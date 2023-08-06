@@ -1,0 +1,134 @@
+basePath: /api
+definitions:
+  web.ActorModelRequest:
+    properties:
+      created_at:
+        type: string
+      date_of_birth:
+        example: "1998-07-21"
+        type: string
+      id:
+        type: integer
+      name:
+        example: Lee Ji Eun
+        type: string
+      nationality_id:
+        example: 1
+        type: integer
+      updated_at:
+        type: string
+    required:
+    - date_of_birth
+    - name
+    - nationality_id
+    type: object
+  web.ResponseError:
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: Required Body Name
+        type: string
+      status:
+        example: Status Bad Request
+        type: string
+    type: object
+  web.ResponseSuccess:
+    properties:
+      code:
+        example: 200
+        type: integer
+      message:
+        example: Successfully created/update data
+        type: string
+      status:
+        example: OK
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server film
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger API E-Film
+  version: "1.0"
+paths:
+  /accounts/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Create Actors
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.ResponseSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.ResponseError'
+      summary: Create Actors
+      tags:
+      - actors
+    put:
+      consumes:
+      - application/json
+      description: Update Actors
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Request body containing the actor information
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/web.ActorModelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.ResponseSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.ResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.ResponseError'
+      summary: Update Actors
+      tags:
+      - actors
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
