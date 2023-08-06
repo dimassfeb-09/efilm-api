@@ -38,7 +38,6 @@ func (a *ActorRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, actor *dom
 	query := "UPDATE actors SET id = $1, name = $2, date_of_birth = $3, nationality_id = $4, updated_at = $5 WHERE id = $6"
 	_, err := tx.ExecContext(ctx, query, actor.ID, actor.Name, actor.DateOfBirth, actor.NationalityID, actor.UpdatedAt, actor.ID)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -76,8 +75,6 @@ func (a *ActorRepositoryImpl) FindByName(ctx context.Context, db *sql.DB, name s
 		}
 		return nil, err
 	}
-
-	fmt.Println(actor)
 
 	return &actor, nil
 }

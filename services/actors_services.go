@@ -37,9 +37,9 @@ func (a *ActorServiceImpl) Save(ctx context.Context, r *web.ActorModelRequest) e
 	}
 	defer helpers.RollbackOrCommit(ctx, tx)
 
-	name, _ := a.FindByName(ctx, r.Name)
-	if name == nil {
-		return errors.New("actor name already exists")
+	_, err = a.FindByName(ctx, r.Name)
+	if err == nil {
+		return errors.New("national name already exists")
 	}
 
 	date, err := time.Parse(time.DateOnly, r.DateOfBirth)
