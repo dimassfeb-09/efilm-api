@@ -94,7 +94,5 @@ func (repository *NationalRepositoryaImpl) FindByID(ctx context.Context, db *sql
 		return nil, err
 	}
 
-	fmt.Println(national)
-
 	return &national, nil
 }

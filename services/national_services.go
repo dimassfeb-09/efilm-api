@@ -35,8 +35,8 @@ func (a *NationalServiceImpl) Save(ctx context.Context, r *web.NationalModelRequ
 	}
 	defer helpers.RollbackOrCommit(ctx, tx)
 
-	_, errs := a.FindByName(ctx, r.Name)
-	if errs == nil {
+	_, err = a.FindByName(ctx, r.Name)
+	if err == nil {
 		return errors.New("national name already exists")
 	}
 

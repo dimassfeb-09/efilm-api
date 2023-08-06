@@ -163,7 +163,6 @@ func (c *NationalControllerImpl) FindBySearch(gc *gin.Context) {
 
 	var nationals []*web.NationalModelResponse
 	if name != "" {
-		fmt.Println(name)
 		result, err := c.NationalService.FindByName(gc.Request.Context(), name)
 		if err != nil {
 			gc.JSON(http.StatusOK, web.ResponseError{
