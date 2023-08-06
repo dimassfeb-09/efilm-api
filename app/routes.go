@@ -23,5 +23,16 @@ func InitialozedRoute(r *gin.Engine, db *sql.DB) *gin.Engine {
 	api.PUT("/actors/:id", actorController.Update)
 	api.DELETE("/actors/:id", actorController.Delete)
 
+	nationalRepository := repository.NewNationalRepository()
+	nationalService := services.NewNationalService(db, nationalRepository)
+	nationalController := controller.NewNationalControllerImpl(nationalService)
+
+	api.POST("/nationals", nationalController.Save)
+	api.GET("/nationals", nationalController.FindAll)
+	api.GET("/nationals/search", nationalController.FindBySearch)
+	api.GET("/nationals/:id", nationalController.FindByID)
+	api.PUT("/nationals/:id", nationalController.Update)
+	api.DELETE("/nationals/:id", nationalController.Delete)
+
 	return r
 }

@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-type ActorController interface {
+type NationalController interface {
 	Save(gc *gin.Context)
 	Update(ctx *gin.Context)
 	Delete(ctx *gin.Context)
@@ -19,16 +19,16 @@ type ActorController interface {
 	FindAll(ctx *gin.Context)
 }
 
-type ActorControllerImpl struct {
-	ActorService services.ActorService
+type NationalControllerImpl struct {
+	NationalService services.NationalService
 }
 
-func NewActorControllerImpl(actorService services.ActorService) ActorController {
-	return &ActorControllerImpl{ActorService: actorService}
+func NewNationalControllerImpl(nationalService services.NationalService) NationalController {
+	return &NationalControllerImpl{NationalService: nationalService}
 }
 
-func (c *ActorControllerImpl) Save(gc *gin.Context) {
-	var r web.ActorModelRequest
+func (c *NationalControllerImpl) Save(gc *gin.Context) {
+	var r web.NationalModelRequest
 	err := gc.ShouldBind(&r)
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
@@ -39,7 +39,7 @@ func (c *ActorControllerImpl) Save(gc *gin.Context) {
 		return
 	}
 
-	err = c.ActorService.Save(context.Background(), &r)
+	err = c.NationalService.Save(context.Background(), &r)
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
@@ -49,9 +49,16 @@ func (c *ActorControllerImpl) Save(gc *gin.Context) {
 		return
 	}
 
+	gc.JSON(http.StatusOK, web.ResponseError{
+		Code:    http.StatusOK,
+		Status:  "OK",
+		Message: "Successfully create data national",
+	})
+	return
+
 }
 
-func (c *ActorControllerImpl) Update(gc *gin.Context) {
+func (c *NationalControllerImpl) Update(gc *gin.Context) {
 	ID, err := strconv.Atoi(gc.Param("id"))
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
@@ -62,7 +69,7 @@ func (c *ActorControllerImpl) Update(gc *gin.Context) {
 		return
 	}
 
-	var r web.ActorModelRequest
+	var r web.NationalModelRequest
 	err = gc.ShouldBind(&r)
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
@@ -74,7 +81,7 @@ func (c *ActorControllerImpl) Update(gc *gin.Context) {
 	}
 
 	r.ID = ID
-	err = c.ActorService.Update(gc.Request.Context(), &r)
+	err = c.NationalService.Update(gc.Request.Context(), &r)
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
@@ -87,11 +94,11 @@ func (c *ActorControllerImpl) Update(gc *gin.Context) {
 	gc.JSON(http.StatusOK, web.ResponseSuccess{
 		Code:    http.StatusOK,
 		Status:  "Ok",
-		Message: fmt.Sprintf("Success update actors with ID %d", ID),
+		Message: fmt.Sprintf("Success update nationals with ID %d", ID),
 	})
 }
 
-func (c *ActorControllerImpl) Delete(gc *gin.Context) {
+func (c *NationalControllerImpl) Delete(gc *gin.Context) {
 	ID, err := strconv.Atoi(gc.Param("id"))
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
@@ -102,7 +109,7 @@ func (c *ActorControllerImpl) Delete(gc *gin.Context) {
 		return
 	}
 
-	err = c.ActorService.Delete(gc.Request.Context(), ID)
+	err = c.NationalService.Delete(gc.Request.Context(), ID)
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
@@ -119,7 +126,7 @@ func (c *ActorControllerImpl) Delete(gc *gin.Context) {
 	})
 }
 
-func (c *ActorControllerImpl) FindByID(gc *gin.Context) {
+func (c *NationalControllerImpl) FindByID(gc *gin.Context) {
 	id, err := strconv.Atoi(gc.Param("id"))
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
@@ -130,7 +137,7 @@ func (c *ActorControllerImpl) FindByID(gc *gin.Context) {
 		return
 	}
 
-	result, err := c.ActorService.FindByID(gc.Request.Context(), id)
+	result, err := c.NationalService.FindByID(gc.Request.Context(), id)
 	if err != nil {
 		gc.JSON(http.StatusOK, web.ResponseError{
 			Code:    http.StatusBadRequest,
@@ -143,7 +150,7 @@ func (c *ActorControllerImpl) FindByID(gc *gin.Context) {
 	webResponse := web.ResponseGetSuccess{
 		Code:    http.StatusOK,
 		Status:  "OK",
-		Message: "Success get data actors by id",
+		Message: "Success get data nationals by id",
 		Data:    result,
 	}
 
@@ -151,13 +158,13 @@ func (c *ActorControllerImpl) FindByID(gc *gin.Context) {
 	return
 }
 
-func (c *ActorControllerImpl) FindBySearch(gc *gin.Context) {
+func (c *NationalControllerImpl) FindBySearch(gc *gin.Context) {
 	name := gc.Query("name")
-	id := gc.Query("national_id")
-	var actors []*web.ActorModelResponse
 
+	var nationals []*web.NationalModelResponse
 	if name != "" {
-		result, err := c.ActorService.FindByName(gc.Request.Context(), name)
+		fmt.Println(name)
+		result, err := c.NationalService.FindByName(gc.Request.Context(), name)
 		if err != nil {
 			gc.JSON(http.StatusOK, web.ResponseError{
 				Code:    http.StatusBadRequest,
@@ -166,63 +173,45 @@ func (c *ActorControllerImpl) FindBySearch(gc *gin.Context) {
 			})
 			return
 		}
-		actors = append(actors, result)
-	}
-
-	if id != "" {
-		idInt, err := strconv.Atoi(id)
-		if err != nil {
-			gc.JSON(http.StatusBadRequest, web.ResponseError{
-				Code:    http.StatusBadRequest,
-				Status:  "Status Bad Request",
-				Message: "Invalid format ID",
-			})
-			return
-		}
-
-		result, err := c.ActorService.FindByID(gc.Request.Context(), idInt)
-		if err != nil {
-			gc.JSON(http.StatusOK, web.ResponseError{
-				Code:    http.StatusBadRequest,
-				Status:  "Status Bad Request",
-				Message: err.Error(),
-			})
-			return
-		}
-		actors = append(actors, result)
+		nationals = append(nationals, result)
+	} else {
+		gc.JSON(http.StatusBadRequest, web.ResponseError{
+			Code:    http.StatusBadRequest,
+			Status:  "Status Bad Request",
+			Message: "Query name is required",
+		})
+		return
 	}
 
 	webResponse := web.ResponseGetSuccess{
 		Code:    http.StatusOK,
 		Status:  "OK",
-		Message: "Success get data actors by id",
-		Data:    actors,
+		Message: "Success get data nationals by parameter",
+		Data:    nationals,
 	}
 
 	gc.JSON(http.StatusOK, webResponse)
 	return
 }
 
-func (c *ActorControllerImpl) FindAll(gc *gin.Context) {
+func (c *NationalControllerImpl) FindAll(gc *gin.Context) {
 
-	var responses []*web.ActorModelResponse
-	results, err := c.ActorService.FindAll(gc.Request.Context())
+	var responses []*web.NationalModelResponse
+	results, err := c.NationalService.FindAll(gc.Request.Context())
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
-			Message: "Failed get all data actors",
+			Message: "Failed get all data nationals",
 		})
 		return
 	}
 	for _, result := range results {
-		response := web.ActorModelResponse{
-			ID:            result.ID,
-			Name:          result.Name,
-			DateOfBirth:   result.DateOfBirth,
-			NationalityID: result.NationalityID,
-			CreatedAt:     result.CreatedAt,
-			UpdatedAt:     result.UpdatedAt,
+		response := web.NationalModelResponse{
+			ID:        result.ID,
+			Name:      result.Name,
+			CreatedAt: result.CreatedAt,
+			UpdatedAt: result.UpdatedAt,
 		}
 		responses = append(responses, &response)
 	}

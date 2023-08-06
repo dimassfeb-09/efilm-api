@@ -16,10 +16,6 @@ servers:
   - url: http://localhost:8080
     description: eFilm API Endpoint
 
-tags:
-  - actors
-  - directors
-
 paths:
 
   # NATIONAL
