@@ -58,7 +58,7 @@ func (c *MovieControllerImpl) Save(gc *gin.Context) {
 }
 
 func (c *MovieControllerImpl) Update(gc *gin.Context) {
-	ID, err := strconv.Atoi(gc.Param("id"))
+	ID, err := strconv.Atoi(gc.Param("movie_id"))
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
@@ -99,7 +99,7 @@ func (c *MovieControllerImpl) Update(gc *gin.Context) {
 }
 
 func (c *MovieControllerImpl) Delete(gc *gin.Context) {
-	ID, err := strconv.Atoi(gc.Param("id"))
+	ID, err := strconv.Atoi(gc.Param("movie_id"))
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
@@ -128,7 +128,8 @@ func (c *MovieControllerImpl) Delete(gc *gin.Context) {
 }
 
 func (c *MovieControllerImpl) FindByID(gc *gin.Context) {
-	id, err := strconv.Atoi(gc.Param("id"))
+
+	id, err := strconv.Atoi(gc.Param("movie_id"))
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
