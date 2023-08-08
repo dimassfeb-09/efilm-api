@@ -432,7 +432,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GetResponseGenreSuccess'
     put:
-      summary: Add new data Genres
+      summary: Update data Genres
       tags:
         - Genres
       requestBody:

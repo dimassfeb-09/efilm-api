@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-type ActorController interface {
+type MovieController interface {
 	Save(gc *gin.Context)
 	Update(ctx *gin.Context)
 	Delete(ctx *gin.Context)
@@ -19,16 +19,16 @@ type ActorController interface {
 	FindAll(ctx *gin.Context)
 }
 
-type ActorControllerImpl struct {
-	ActorService services.ActorService
+type MovieControllerImpl struct {
+	MovieService services.MovieService
 }
 
-func NewActorControllerImpl(actorService services.ActorService) ActorController {
-	return &ActorControllerImpl{ActorService: actorService}
+func NewMovieControllerImpl(movieService services.MovieService) MovieController {
+	return &MovieControllerImpl{MovieService: movieService}
 }
 
-func (c *ActorControllerImpl) Save(gc *gin.Context) {
-	var r web.ActorModelRequest
+func (c *MovieControllerImpl) Save(gc *gin.Context) {
+	var r web.MovieModelRequest
 	err := gc.ShouldBind(&r)
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
@@ -39,7 +39,7 @@ func (c *ActorControllerImpl) Save(gc *gin.Context) {
 		return
 	}
 
-	err = c.ActorService.Save(context.Background(), &r)
+	err = c.MovieService.Save(context.Background(), &r)
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
@@ -52,12 +52,12 @@ func (c *ActorControllerImpl) Save(gc *gin.Context) {
 	gc.JSON(http.StatusOK, web.ResponseSuccess{
 		Code:    http.StatusOK,
 		Status:  "Ok",
-		Message: "Successfully created actors",
+		Message: "Successfully created movies",
 	})
 	return
 }
 
-func (c *ActorControllerImpl) Update(gc *gin.Context) {
+func (c *MovieControllerImpl) Update(gc *gin.Context) {
 	ID, err := strconv.Atoi(gc.Param("id"))
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
@@ -68,7 +68,7 @@ func (c *ActorControllerImpl) Update(gc *gin.Context) {
 		return
 	}
 
-	var r web.ActorModelRequest
+	var r web.MovieModelRequest
 	err = gc.ShouldBind(&r)
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
@@ -80,7 +80,7 @@ func (c *ActorControllerImpl) Update(gc *gin.Context) {
 	}
 
 	r.ID = ID
-	err = c.ActorService.Update(gc.Request.Context(), &r)
+	err = c.MovieService.Update(gc.Request.Context(), &r)
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
@@ -93,12 +93,12 @@ func (c *ActorControllerImpl) Update(gc *gin.Context) {
 	gc.JSON(http.StatusOK, web.ResponseSuccess{
 		Code:    http.StatusOK,
 		Status:  "Ok",
-		Message: fmt.Sprintf("Success update actors with ID %d", ID),
+		Message: fmt.Sprintf("Success update movies with ID %d", ID),
 	})
 	return
 }
 
-func (c *ActorControllerImpl) Delete(gc *gin.Context) {
+func (c *MovieControllerImpl) Delete(gc *gin.Context) {
 	ID, err := strconv.Atoi(gc.Param("id"))
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
@@ -109,7 +109,7 @@ func (c *ActorControllerImpl) Delete(gc *gin.Context) {
 		return
 	}
 
-	err = c.ActorService.Delete(gc.Request.Context(), ID)
+	err = c.MovieService.Delete(gc.Request.Context(), ID)
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
@@ -127,7 +127,7 @@ func (c *ActorControllerImpl) Delete(gc *gin.Context) {
 	return
 }
 
-func (c *ActorControllerImpl) FindByID(gc *gin.Context) {
+func (c *MovieControllerImpl) FindByID(gc *gin.Context) {
 	id, err := strconv.Atoi(gc.Param("id"))
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
@@ -138,7 +138,7 @@ func (c *ActorControllerImpl) FindByID(gc *gin.Context) {
 		return
 	}
 
-	result, err := c.ActorService.FindByID(gc.Request.Context(), id)
+	result, err := c.MovieService.FindByID(gc.Request.Context(), id)
 	if err != nil {
 		gc.JSON(http.StatusOK, web.ResponseError{
 			Code:    http.StatusBadRequest,
@@ -151,7 +151,7 @@ func (c *ActorControllerImpl) FindByID(gc *gin.Context) {
 	webResponse := web.ResponseGetSuccess{
 		Code:    http.StatusOK,
 		Status:  "OK",
-		Message: "Success get data actors by id",
+		Message: "Success get data movies by id",
 		Data:    result,
 	}
 
@@ -159,23 +159,12 @@ func (c *ActorControllerImpl) FindByID(gc *gin.Context) {
 	return
 }
 
-func (c *ActorControllerImpl) FindBySearch(gc *gin.Context) {
-	name := gc.Query("name")
-	id := gc.Query("national_id")
-	var actors []*web.ActorModelResponse
+func (c *MovieControllerImpl) FindBySearch(gc *gin.Context) {
+	title := gc.Query("title")
+	var movies []*web.MovieModelResponse
 
-	if id != "" {
-		idInt, err := strconv.Atoi(id)
-		if err != nil {
-			gc.JSON(http.StatusBadRequest, web.ResponseError{
-				Code:    http.StatusBadRequest,
-				Status:  "Status Bad Request",
-				Message: "Invalid format ID",
-			})
-			return
-		}
-
-		result, err := c.ActorService.FindByNational(gc.Request.Context(), idInt)
+	if title != "" {
+		result, err := c.MovieService.FindByTitle(gc.Request.Context(), title)
 		if err != nil {
 			gc.JSON(http.StatusOK, web.ResponseError{
 				Code:    http.StatusBadRequest,
@@ -184,53 +173,44 @@ func (c *ActorControllerImpl) FindBySearch(gc *gin.Context) {
 			})
 			return
 		}
-		actors = result
-	}
-
-	if name != "" {
-		result, err := c.ActorService.FindByName(gc.Request.Context(), name)
-		if err != nil {
-			gc.JSON(http.StatusOK, web.ResponseError{
-				Code:    http.StatusBadRequest,
-				Status:  "Status Bad Request",
-				Message: err.Error(),
-			})
-			return
-		}
-		actors = append(actors, result)
+		movies = append(movies, result)
 	}
 
 	webResponse := web.ResponseGetSuccess{
 		Code:    http.StatusOK,
 		Status:  "OK",
-		Message: "Success get data actors by search",
-		Data:    actors,
+		Message: "Success get data movies by search",
+		Data:    movies,
 	}
 
 	gc.JSON(http.StatusOK, webResponse)
 	return
 }
 
-func (c *ActorControllerImpl) FindAll(gc *gin.Context) {
+func (c *MovieControllerImpl) FindAll(gc *gin.Context) {
 
-	var responses []*web.ActorModelResponse
-	results, err := c.ActorService.FindAll(gc.Request.Context())
+	var responses []*web.MovieModelResponse
+	results, err := c.MovieService.FindAll(gc.Request.Context())
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
-			Message: "Failed get all data actors",
+			Message: "Failed get all data movies",
 		})
 		return
 	}
 	for _, result := range results {
-		response := web.ActorModelResponse{
-			ID:            result.ID,
-			Name:          result.Name,
-			DateOfBirth:   result.DateOfBirth,
-			NationalityID: result.NationalityID,
-			CreatedAt:     result.CreatedAt,
-			UpdatedAt:     result.UpdatedAt,
+		response := web.MovieModelResponse{
+			ID:          result.ID,
+			Title:       result.Title,
+			ReleaseDate: result.ReleaseDate,
+			Duration:    result.Duration,
+			Plot:        result.Plot,
+			PosterUrl:   result.PosterUrl,
+			TrailerUrl:  result.TrailerUrl,
+			Language:    result.Language,
+			CreatedAt:   result.CreatedAt,
+			UpdatedAt:   result.UpdatedAt,
 		}
 		responses = append(responses, &response)
 	}

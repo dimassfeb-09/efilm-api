@@ -56,5 +56,16 @@ func InitialozedRoute(r *gin.Engine, db *sql.DB) *gin.Engine {
 	api.PUT("/genres/:id", genreController.Update)
 	api.DELETE("/genres/:id", genreController.Delete)
 
+	movieRepository := repository.NewMovieRepository()
+	movieService := services.NewMovieService(db, movieRepository)
+	movieController := controller.NewMovieControllerImpl(movieService)
+
+	api.POST("/movies", movieController.Save)
+	api.GET("/movies", movieController.FindAll)
+	api.GET("/movies/search", movieController.FindBySearch)
+	api.GET("/movies/:id", movieController.FindByID)
+	api.PUT("/movies/:id", movieController.Update)
+	api.DELETE("/movies/:id", movieController.Delete)
+
 	return r
 }
