@@ -39,7 +39,7 @@ func (a *ActorServiceImpl) Save(ctx context.Context, r *web.ActorModelRequest) e
 
 	_, err = a.FindByName(ctx, r.Name)
 	if err == nil {
-		return errors.New("national name already exists")
+		return errors.New("actors name already exists")
 	}
 
 	date, err := time.Parse(time.DateOnly, r.DateOfBirth)
