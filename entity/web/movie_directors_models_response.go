@@ -4,12 +4,6 @@ import (
 	"time"
 )
 
-type Movie struct {
-	MovieID     int       `json:"movie_id"`
-	Title       string    `json:"title"`
-	ReleaseDate time.Time `json:"release_date"`
-}
-
 type Director struct {
 	DirectorID  int       `json:"director_id"`
 	Name        string    `json:"name"`

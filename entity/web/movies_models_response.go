@@ -14,3 +14,9 @@ type MovieModelResponse struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
+
+type Movie struct {
+	MovieID     int       `json:"movie_id"`
+	Title       string    `json:"title"`
+	ReleaseDate time.Time `json:"release_date"`
+}

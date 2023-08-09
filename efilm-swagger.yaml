@@ -628,6 +628,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetResponseMovieActorSuccess'
+
   /movies/{movie_id}/actors/{actor_id}:
     put:
       summary: Update the role of an actors in a movie
@@ -797,9 +798,6 @@ paths:
 
 
 components:
-  parameters:
-
-
   schemas:
 
     # National Request Response
@@ -1188,36 +1186,31 @@ components:
         language:
           type: string
           example: Korean / Hangeul
+
     MovieActorsResponse:
       type: object
       properties:
+        movie_id:
+          type: int
+          example: 1
         title:
           type: string
           example: Vagabond
         release_date:
           type: string
-          example: 2019
-        duration:
-          type: string
-          example: 110
-        plot:
-          type: string
-          example: Cha Dal-Geon (Lee Seung-Gi) is a stunt man...
-        poster_url:
-          type: string
-          example: https://asianwiki.com/images/f/f9/Vagabond_%28Korean_Drama%29-P1.jpg
-        trailer_url:
-          type: string
-          example: https://www.youtube.com/watch?v=tyhnEHCUtv4
-        language:
-          type: string
-          example: Korean / Hangeul
-        created_at:
-          type: string
-          example: "2023-03-04T19:25:42.229484Z"
-        updated_at:
-          type: string
-          example: "2023-03-04T19:25:42.229484Z"
+          example: 1972-10-06T00:00:00Z
+        actors:
+          type: array
+          properties:
+            actor_id:
+              type: int
+              example: 1
+            name:
+              type: string
+              example: Bae Suzy
+            role:
+              type: string
+              example: Go Hae Ri
 
     GetResponseMovieActorSuccess:
       type: object
@@ -1238,7 +1231,8 @@ components:
             actors:
               type: array
               items:
-                $ref: '#/components/schemas/MovieActorsResponse'
+                $ref: '#/components/schemas/ActorsResponse'
+
     GetAllResponseMovieActorSuccess:
       type: object
       properties:
@@ -1297,30 +1291,16 @@ components:
     MovieDirectorsResponse:
       type: object
       properties:
-        movie:
-          type: object
-          properties:
-            movie_id:
-              type: int
-              example: Vagabond
-            title:
-              type: string
-              example: Vagabond
-            release_date:
-              type: string
-              example: 1972-10-06T00:00:00Z
-        directors:
-          type: array
-          properties:
-            director_id:
-              type: int
-              example: Vagabond
-            name:
-              type: string
-              example: Yoo In Sik
-            date_of_birth:
-              type: string
-              example: 1972-10-06T00:00:00Z
+        movie_id:
+          type: int
+          example: Vagabond
+        title:
+          type: string
+          example: Vagabond
+        release_date:
+          type: string
+          example: 1972-10-06T00:00:00Z
+
 
     GetResponseMovieDirectorSuccess:
       type: object

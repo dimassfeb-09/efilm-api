@@ -80,25 +80,25 @@ func (service *MovieActorServiceImpl) Delete(ctx context.Context, actorID int) e
 }
 
 func (service *MovieActorServiceImpl) FindByID(ctx context.Context, movieID int) (*web.MovieActorModelResponse, error) {
-
 	result, err := service.MovieActorRepository.FindByID(ctx, service.DB, movieID)
 	if err != nil {
 		return nil, err
 	}
 
 	movieActor := &web.MovieActorModelResponse{
-		ID:          result.ID,
-		MovieID:     result.MovieID,
-		Title:       result.Title,
-		ReleaseDate: result.ReleaseDate,
-		Duration:    result.Duration,
-		Plot:        result.Plot,
-		PosterUrl:   result.PosterUrl,
-		TrailerUrl:  result.TrailerUrl,
-		Language:    result.Language,
-		Actors:      result.Actors,
-		CreatedAt:   result.CreatedAt,
-		UpdatedAt:   result.UpdatedAt,
+		Movie: web.Movie{
+			MovieID:     result.Movie.ID,
+			Title:       result.Movie.Title,
+			ReleaseDate: result.Movie.ReleaseDate,
+		},
+	}
+
+	for _, actor := range result.Actors {
+		movieActor.Actors = append(movieActor.Actors, web.Actor{
+			ActorID:     actor.ID,
+			Name:        actor.Name,
+			DateOfBirth: actor.DateOfBirth,
+		})
 	}
 
 	return movieActor, nil

@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/dimassfeb-09/efilm-api.git/entity/domain"
+	"time"
 )
 
 type MovieActorRepository interface {
@@ -61,90 +61,67 @@ func (repository *MovieActorRepositoryaImpl) Delete(ctx context.Context, tx *sql
 func (repository *MovieActorRepositoryaImpl) FindByID(ctx context.Context, db *sql.DB, movieID int) (*domain.MovieActor, error) {
 
 	query := `
-		SELECT 
-		    movie_actors.id AS id,
-		    movies.id AS movie_id,
-			movies.title AS title,
-			movies.release_date AS release_date,
-			movies.duration AS duration,
-			movies.plot AS plot,
-			movies.poster_url AS poster_url,
-			movies.trailer_url AS trailer_url,
-			movies.language AS language,
-			movies.created_at AS movie_created_at,
-			movies.updated_at AS movie_updated_at,
-			actors.id AS actor_id,
-			actors.name AS name,
-			actors.date_of_birth AS date_of_birth,
-			actors.nationality_id AS nationality_id,
-			actors.created_at AS actor_created_at,
-			actors.updated_at AS actor_updated_at
-		FROM movie_actors
-		JOIN actors ON movie_actors.actor_id = actors.id
-		JOIN movies ON movie_actors.movie_id = movies.id WHERE movies.id = $1
+		SELECT
+			m.id AS movie_id,
+			m.title AS title,
+			m.release_date AS release_date,
+			a.id AS actor_id,
+			a.name AS actor_name,
+			a.date_of_birth AS actor_dob
+		FROM movies m
+		LEFT JOIN movie_actors ma ON m.id = ma.movie_id
+		LEFT JOIN actors a ON ma.actor_id = a.id
+		WHERE m.id = $1;
 	`
 
 	rows, err := db.QueryContext(ctx, query, movieID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("failed get data from database")
-		}
 		return nil, err
 	}
 	defer rows.Close()
 
-	var movieActors domain.MovieActor
-	var movie domain.Movie
+	var actorMovie domain.MovieActor
 	for rows.Next() {
-		var actor domain.Actor
+		var movieID int
+		var title string
+		var releaseDate time.Time
+		var actorID sql.NullInt64
+		var actorName sql.NullString
+		var actorDOB sql.NullTime
 
-		err := rows.Scan(
-			&movieActors.ID,
-			&movie.ID,
-			&movie.Title,
-			&movie.ReleaseDate,
-			&movie.Duration,
-			&movie.Plot,
-			&movie.PosterUrl,
-			&movie.TrailerUrl,
-			&movie.Language,
-			&movie.CreatedAt,
-			&movie.UpdatedAt,
-			&actor.ID,
-			&actor.Name,
-			&actor.DateOfBirth,
-			&actor.NationalityID,
-			&actor.CreatedAt,
-			&actor.UpdatedAt,
+		rows.Scan(
+			&movieID,
+			&title,
+			&releaseDate,
+			&actorID,
+			&actorName,
+			&actorDOB,
 		)
-		if err != nil {
-			return nil, err
+
+		actorMovie.Movie = domain.Movie{
+			ID:          movieID,
+			Title:       title,
+			ReleaseDate: releaseDate,
 		}
 
-		movieActors.MovieID = movie.ID
-		movieActors.Title = movie.Title
-		movieActors.ReleaseDate = movie.ReleaseDate
-		movieActors.Duration = movie.Duration
-		movieActors.Plot = movie.Plot
-		movieActors.PosterUrl = movie.PosterUrl
-		movieActors.TrailerUrl = movie.TrailerUrl
-		movieActors.Language = movie.Language
-		movieActors.CreatedAt = movie.CreatedAt
-		movieActors.UpdatedAt = movie.UpdatedAt
-
-		actorInstance := domain.Actor{
-			ID:            actor.ID,
-			Name:          actor.Name,
-			DateOfBirth:   actor.DateOfBirth,
-			NationalityID: actor.NationalityID,
-			CreatedAt:     actor.CreatedAt,
-			UpdatedAt:     actor.UpdatedAt,
+		if actorID.Valid {
+			actor := domain.Actor{
+				ID:          int(actorID.Int64),
+				Name:        actorName.String,
+				DateOfBirth: actorDOB.Time,
+			}
+			actorMovie.Actors = append(actorMovie.Actors, actor)
+		} else {
+			actorMovie.Actors = nil
 		}
 
-		movieActors.Actors = append(movieActors.Actors, actorInstance)
 	}
 
-	return &movieActors, nil
+	if actorMovie.Movie.ID == 0 {
+		return nil, errors.New("movie not found")
+	}
+
+	return &actorMovie, nil
 }
 
 func (repository *MovieActorRepositoryaImpl) FindActorAtMovieExists(ctx context.Context, db *sql.DB, actorID int) error {
