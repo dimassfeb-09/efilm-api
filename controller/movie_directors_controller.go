@@ -23,12 +23,13 @@ func NewMovieDirectorControllerImpl(directorService services.MovieDirectorServic
 }
 
 func (controller *MovieDirectorControllerImpl) Save(gc *gin.Context) {
+
 	movieID, err := strconv.Atoi(gc.Param("movie_id"))
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
-			Message: "Invalid format Movie ID",
+			Message: "Invalid format movie_id",
 		})
 		return
 	}
@@ -39,12 +40,13 @@ func (controller *MovieDirectorControllerImpl) Save(gc *gin.Context) {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
-			Message: "Invalid format Movie ID",
+			Message: err.Error(),
 		})
 		return
 	}
 
 	movieActor.MovieID = movieID
+
 	err = controller.MovieDirectorService.Save(gc.Request.Context(), &movieActor)
 	if err != nil {
 		gc.JSON(http.StatusBadRequest, web.ResponseError{
