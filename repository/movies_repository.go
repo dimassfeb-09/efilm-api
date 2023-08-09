@@ -28,7 +28,7 @@ func (a *MovieRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, movie *domai
 	query := "INSERT INTO movies (title, release_date, duration, plot, poster_url, trailer_url, language) VALUES ($1, $2, $3, $4, $5, $6, $7)"
 	_, err := tx.ExecContext(ctx, query, movie.Title, movie.ReleaseDate, movie.Duration, movie.Plot, movie.PosterUrl, movie.TrailerUrl, movie.Language)
 	if err != nil {
-		return err
+		return errors.New("failed save data movie")
 	}
 
 	return nil
@@ -38,7 +38,7 @@ func (a *MovieRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, movie *dom
 	query := "UPDATE movies SET id = $1, title = $2, release_date = $3, duration = $4, plot = $5, poster_url = $6, trailer_url = $7, language = $8, updated_at = CURRENT_TIMESTAMP WHERE id = $9"
 	_, err := tx.ExecContext(ctx, query, movie.ID, movie.Title, movie.ReleaseDate, movie.Duration, movie.Plot, movie.PosterUrl, movie.TrailerUrl, movie.Language, movie.ID)
 	if err != nil {
-		return err
+		return errors.New("failed update data movie")
 	}
 
 	return nil
@@ -47,7 +47,7 @@ func (a *MovieRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, movie *dom
 func (a *MovieRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, ID int) error {
 	_, err := tx.Exec("DELETE FROM movies WHERE id = $1", ID)
 	if err != nil {
-		return err
+		return errors.New("failed delete data from movies")
 	}
 
 	return nil
