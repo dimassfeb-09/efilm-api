@@ -1297,33 +1297,30 @@ components:
     MovieDirectorsResponse:
       type: object
       properties:
-        title:
-          type: string
-          example: Vagabond
-        release_date:
-          type: string
-          example: 2019
-        duration:
-          type: string
-          example: 110
-        plot:
-          type: string
-          example: Cha Dal-Geon (Lee Seung-Gi) is a stunt man...
-        poster_url:
-          type: string
-          example: https://asianwiki.com/images/f/f9/Vagabond_%28Korean_Drama%29-P1.jpg
-        trailer_url:
-          type: string
-          example: https://www.youtube.com/watch?v=tyhnEHCUtv4
-        language:
-          type: string
-          example: Korean / Hangeul
-        created_at:
-          type: string
-          example: "2023-03-04T19:25:42.229484Z"
-        updated_at:
-          type: string
-          example: "2023-03-04T19:25:42.229484Z"
+        movie:
+          type: object
+          properties:
+            movie_id:
+              type: int
+              example: Vagabond
+            title:
+              type: string
+              example: Vagabond
+            release_date:
+              type: string
+              example: 1972-10-06T00:00:00Z
+        directors:
+          type: array
+          properties:
+            director_id:
+              type: int
+              example: Vagabond
+            name:
+              type: string
+              example: Yoo In Sik
+            date_of_birth:
+              type: string
+              example: 1972-10-06T00:00:00Z
 
     GetResponseMovieDirectorSuccess:
       type: object
@@ -1341,7 +1338,7 @@ components:
           properties:
             movie:
               $ref: '#/components/schemas/MovieDirectorsResponse'
-            director:
+            directors:
               type: array
               items:
                 $ref: '#/components/schemas/DirectorsResponse'
