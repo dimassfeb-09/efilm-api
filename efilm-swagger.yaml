@@ -325,6 +325,8 @@ paths:
         - name: id
           in: path
           required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Success get data
@@ -336,6 +338,12 @@ paths:
       summary: Add new data Directors
       tags:
         - Directors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         content:
           application/json:
@@ -424,6 +432,8 @@ paths:
         - name: id
           in: path
           required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Success get data
@@ -435,6 +445,12 @@ paths:
       summary: Update data Genres
       tags:
         - Genres
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         content:
           application/json:
@@ -566,7 +582,7 @@ paths:
       summary: Delete data movie
       tags:
         - Movie
-      operationId: movie.put
+      operationId: movie.delete
       parameters:
         - name: id
           in: path
@@ -594,6 +610,8 @@ paths:
         - name: movie_id
           in: path
           required: true
+          schema:
+            type: integer
       requestBody:
         content:
           application/json:
@@ -621,6 +639,9 @@ paths:
         - name: movie_id
           in: path
           required: true
+          example: 1
+          schema:
+            type: integer
       responses:
         '200':
           description: Success get data
@@ -640,10 +661,14 @@ paths:
           in: path
           required: true
           example: 2
+          schema:
+            type: integer
         - name: actor_id
           in: path
           required: true
           example: 1
+          schema:
+            type: integer
       requestBody:
         content:
           application/json:
@@ -668,10 +693,14 @@ paths:
           in: path
           required: true
           example: 2
+          schema:
+            type: integer
         - name: actor_id
           in: path
           required: true
           example:  1
+          schema:
+            type: integer
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -687,6 +716,8 @@ paths:
         - name: movie_id
           in: path
           required: true
+          schema:
+            type: integer
       requestBody:
         content:
           application/json:
@@ -710,6 +741,8 @@ paths:
         - name: movie_id
           in: path
           required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Success get data
@@ -728,10 +761,14 @@ paths:
           in: path
           required: true
           example: 2
+          schema:
+            type: integer
         - name: director_id
           in: path
           required: true
           example: 1
+          schema:
+            type: integer
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -747,6 +784,8 @@ paths:
         - name: movie_id
           in: path
           required: true
+          schema:
+            type: integer
       requestBody:
         content:
           application/json:
@@ -770,13 +809,15 @@ paths:
         - name: movie_id
           in: path
           required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Success get data
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetResponseMovieDirectorSuccess'
+                $ref: '#/components/schemas/GetResponseMovieGenreSuccess'
   /movies/{movie_id}/genres/{genre_id}:
     delete:
       summary: Remove an genre from a movie
@@ -788,10 +829,14 @@ paths:
           in: path
           required: true
           example: 2
+          schema:
+            type: integer
         - name: genre_id
           in: path
           required: true
           example: 1
+          schema:
+            type: integer
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -813,7 +858,7 @@ components:
       type: object
       properties:
         id:
-          type: int
+          type: integer
           example: 1
         name:
           type: string
@@ -1012,18 +1057,12 @@ components:
     GenresResponse:
       type: object
       properties:
-        id:
+        genre_id:
           type: number
           example: 1
         name:
           type: string
-          example: Drama Korea
-        created_at:
-          type: string
-          example: "2023-03-04T19:25:42.229484Z"
-        update_at:
-          type: string
-          example: "2023-07-04T19:25:42.229484Z"
+          example: Action
 
     GetResponseGenreSuccess:
       type: object
@@ -1153,45 +1192,12 @@ components:
             $ref: '#/components/schemas/MoviesResponse'
 
     # Movie Actor Request Response
-    MovieActorsRequest:
-      type: object
-      required:
-        - name
-        - title
-        - release_date
-        - duration
-        - plot
-        - poster_url
-        - trailer_url
-        - language
-      properties:
-        title:
-          type: string
-          example: Vagabond
-        release_date:
-          type: string
-          example: 2019
-        duration:
-          type: string
-          example: 110
-        plot:
-          type: string
-          example: Cha Dal-Geon (Lee Seung-Gi) is a stunt man...
-        poster_url:
-          type: string
-          example: https://asianwiki.com/images/f/f9/Vagabond_%28Korean_Drama%29-P1.jpg
-        trailer_url:
-          type: string
-          example: https://www.youtube.com/watch?v=tyhnEHCUtv4
-        language:
-          type: string
-          example: Korean / Hangeul
 
     MovieActorsResponse:
       type: object
       properties:
         movie_id:
-          type: int
+          type: integer
           example: 1
         title:
           type: string
@@ -1201,16 +1207,18 @@ components:
           example: 1972-10-06T00:00:00Z
         actors:
           type: array
-          properties:
-            actor_id:
-              type: int
-              example: 1
-            name:
-              type: string
-              example: Bae Suzy
-            role:
-              type: string
-              example: Go Hae Ri
+          items:
+            properties:
+              actor_id:
+                type: integer
+                example: 1
+              name:
+                type: string
+                example: Bae Suzy
+              role:
+                type: string
+                example: Go Hae Ri
+
 
     GetResponseMovieActorSuccess:
       type: object
@@ -1233,66 +1241,15 @@ components:
               items:
                 $ref: '#/components/schemas/ActorsResponse'
 
-    GetAllResponseMovieActorSuccess:
-      type: object
-      properties:
-        code:
-          type: number
-          example: 200
-        status:
-          type: string
-          example: OK
-        message:
-          type: string
-          example: "Successfully get genres"
-        data:
-          properties:
-            movie:
-              $ref: '#/components/schemas/MovieActorsResponse'
-            actors:
-              type: array
-              items:
-                $ref: '#/components/schemas/MovieActorsResponse'
+
 
     # Movie Director Request Response
-    MovieDirectorsRequest:
-      type: object
-      required:
-        - name
-        - title
-        - release_date
-        - duration
-        - plot
-        - poster_url
-        - trailer_url
-        - language
-      properties:
-        title:
-          type: string
-          example: Vagabond
-        release_date:
-          type: string
-          example: 2019
-        duration:
-          type: string
-          example: 110
-        plot:
-          type: string
-          example: Cha Dal-Geon (Lee Seung-Gi) is a stunt man...
-        poster_url:
-          type: string
-          example: https://asianwiki.com/images/f/f9/Vagabond_%28Korean_Drama%29-P1.jpg
-        trailer_url:
-          type: string
-          example: https://www.youtube.com/watch?v=tyhnEHCUtv4
-        language:
-          type: string
-          example: Korean / Hangeul
+
     MovieDirectorsResponse:
       type: object
       properties:
         movie_id:
-          type: int
+          type: integer
           example: Vagabond
         title:
           type: string
@@ -1322,57 +1279,21 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/DirectorsResponse'
-    GetAllResponseMovieDirectorSuccess:
-      type: object
-      properties:
-        code:
-          type: number
-          example: 200
-        status:
-          type: string
-          example: OK
-        message:
-          type: string
-          example: "Successfully get genres"
-        data:
-          properties:
-            movie:
-              $ref: '#/components/schemas/MovieDirectorsResponse'
-            actors:
-              type: array
-              items:
-                $ref: '#/components/schemas/MovieDirectorsResponse'
+
 
     # Movie Director Request Response
-    MovieGenresRequest:
-      type: object
-      required:
-        - movie_id
-        - genre_id
-      properties:
-        movie_id:
-          type: integer
-          example: 1
-        genre_id:
-          type: integer
-          example: 2
+
 
     MovieGenresResponse:
       type: object
       properties:
-        id:
-          type: integer
-          example: Vagabond
         movie_id:
           type: integer
           example: 1
-        genre_id:
-          type: integer
-          example: 2
-        created_at:
+        title:
           type: string
-          example: "2023-03-04T19:25:42.229484Z"
-        updated_at:
+          example: Vagabond
+        release_date:
           type: string
           example: "2023-03-04T19:25:42.229484Z"
 
@@ -1392,30 +1313,11 @@ components:
           properties:
             movie:
               $ref: '#/components/schemas/MovieGenresResponse'
-            director:
+            genres:
               type: array
               items:
                 $ref: '#/components/schemas/GenresResponse'
-    GetAllResponseMovieGenreSuccess:
-      type: object
-      properties:
-        code:
-          type: number
-          example: 200
-        status:
-          type: string
-          example: OK
-        message:
-          type: string
-          example: "Successfully get genres"
-        data:
-          properties:
-            movie:
-              $ref: '#/components/schemas/MovieGenresResponse'
-            actors:
-              type: array
-              items:
-                $ref: '#/components/schemas/MovieGenresResponse'
+
 
 
 
