@@ -1,8 +1,6 @@
 package app
 
 import (
-	"github.com/joho/godotenv"
-	"log"
 	"os"
 )
 
@@ -16,11 +14,6 @@ type Env struct {
 }
 
 func getEnv() *Env {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	return &Env{
 		DBHost:    os.Getenv("DB_HOST"),
 		DBName:    os.Getenv("DB_NAME"),

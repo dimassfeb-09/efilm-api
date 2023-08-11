@@ -7,11 +7,18 @@ import (
 	"time"
 )
 
-func DBConnection() (*sql.DB, error) {
+func DBConnection() *sql.DB {
 
 	env := getEnv()
+	fmt.Println(env)
+	connectionString := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=%v",
+		env.DBUser,
+		env.DBPass,
+		env.DBHost,
+		env.DBPort,
+		env.DBName,
+		env.DBSSLMode)
 
-	connectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", env.DBHost, env.DBPort, env.DBUser, env.DBPass, env.DBName, env.DBSSLMode)
 	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
 		log.Fatal("Failed to connect DB" + err.Error())
@@ -22,5 +29,5 @@ func DBConnection() (*sql.DB, error) {
 	db.SetConnMaxLifetime(60 * time.Minute)
 
 	log.Println("Successfully connected DB!")
-	return db, err
+	return db
 }

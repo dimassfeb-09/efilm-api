@@ -5,19 +5,24 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"log"
+	"os"
 )
 
 func main() {
 	r := gin.Default()
 	r.HandleMethodNotAllowed = true
+	gin.SetMode(gin.ReleaseMode)
 
-	db, err := app.DBConnection()
+	db := app.DBConnection()
 	defer db.Close()
 
 	r = app.InitialozedRoute(r, db)
-	errAddress := r.Run(":8080")
-	if errAddress != nil {
-		log.Fatal(err)
+
+	port := os.Getenv("APP_PORT")
+	err := r.Run(":" + port)
+	if err != nil {
+		log.Fatalf("Cannot run at port 8080: %s", err.Error())
 	}
 
+	log.Printf("Success run at port 8080")
 }
