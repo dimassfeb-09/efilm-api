@@ -11,3 +11,11 @@
 .idea/dataSources
 .idea/dataSources.local.xml
 fly.toml
+
+
+.env
+docker-compose.yml
+Dockerfile
+
+./docker-compose.yml
+./Dockerfile

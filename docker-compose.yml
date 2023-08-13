@@ -1,0 +1,55 @@
+services:
+  db_postgres:
+    container_name: db_postgres
+    image: postgres:latest
+    restart: always
+    ports:
+      - 54332:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 7b0a9cb4df4a8e6e5f9c4b73df6fbf120ba788f2f8d98650
+      POSTGRES_DB: efilm_api
+    networks:
+      - efilm_api_network
+    volumes:
+      - type: volume
+        source: postgres_data
+        target: "/data/postgres/db"
+        read_only: false
+
+  go_app:
+    container_name: go_app
+    build:
+      context: "./"
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    networks:
+      - efilm_api_network
+    environment:
+      DB_HOST: efilm-api-project-postgresdb.internal
+      DB_NAME: efilm_api
+      DB_PASS: uHLGUmPBvQiT6qI
+      DB_PORT: 5433
+      DB_USER: postgres
+      DB_SSL_MODE: disable
+      GIN_MODE: release
+    volumes:
+      - type: volume
+        source: go_data
+        target: "/data/golang/data"
+        read_only: false
+    depends_on:
+      - db_postgres
+
+
+networks:
+  efilm_api_network:
+    name: efilm_api_network
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: postgres_data
+  go_data:
+    name: go_data

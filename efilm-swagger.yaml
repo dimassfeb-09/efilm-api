@@ -1205,19 +1205,6 @@ components:
         release_date:
           type: string
           example: 1972-10-06T00:00:00Z
-        actors:
-          type: array
-          items:
-            properties:
-              actor_id:
-                type: integer
-                example: 1
-              name:
-                type: string
-                example: Bae Suzy
-              role:
-                type: string
-                example: Go Hae Ri
 
 
     GetResponseMovieActorSuccess:
