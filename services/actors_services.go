@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
+
 	"github.com/dimassfeb-09/efilm-api.git/entity/domain"
 	"github.com/dimassfeb-09/efilm-api.git/entity/web"
 	"github.com/dimassfeb-09/efilm-api.git/helpers"
 	"github.com/dimassfeb-09/efilm-api.git/repository"
-	"time"
 )
 
 type ActorService interface {
@@ -44,7 +45,7 @@ func (a *ActorServiceImpl) Save(ctx context.Context, r *web.ActorModelRequest) e
 
 	date, err := time.Parse(time.DateOnly, r.DateOfBirth)
 	if err != nil {
-		return errors.New("Incorrect date format yyyy-dd-mm")
+		return errors.New("incorrect date format yyyy-dd-mm")
 	}
 
 	return a.ActorRepository.Save(ctx, tx, &domain.Actor{
@@ -54,8 +55,6 @@ func (a *ActorServiceImpl) Save(ctx context.Context, r *web.ActorModelRequest) e
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
 	})
-
-	return nil
 }
 
 func (a *ActorServiceImpl) Update(ctx context.Context, r *web.ActorModelRequest) error {

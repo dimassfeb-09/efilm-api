@@ -10,7 +10,7 @@ import (
 func DBConnection() *sql.DB {
 
 	env := getEnv()
-	fmt.Println(env)
+
 	connectionString := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=%v",
 		env.DBUser,
 		env.DBPass,

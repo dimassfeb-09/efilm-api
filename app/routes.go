@@ -2,6 +2,7 @@ package app
 
 import (
 	"database/sql"
+
 	"github.com/dimassfeb-09/efilm-api.git/controller"
 	"github.com/dimassfeb-09/efilm-api.git/repository"
 	"github.com/dimassfeb-09/efilm-api.git/services"
@@ -12,9 +13,18 @@ func InitialozedRoute(r *gin.Engine, db *sql.DB) *gin.Engine {
 
 	api := r.Group("/api")
 
+	authRepository := repository.NewAuthRepository()
+	authService := services.NewAuthService(db, authRepository)
+	authController := controller.NewAuthControllerImpl(authService)
+
+	api.POST("/auth/register", authController.Register)
+	api.POST("/auth/login", authController.Login)
+
 	actorRepository := repository.NewActorRepository()
 	actorService := services.NewActorService(db, actorRepository)
 	actorController := controller.NewActorControllerImpl(actorService)
+
+	api.Use(MiddlewareToken)
 
 	api.POST("/actors", actorController.Save)
 	api.GET("/actors", actorController.FindAll)

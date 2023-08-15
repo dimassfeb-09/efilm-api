@@ -1,11 +1,12 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/dimassfeb-09/efilm-api.git/app"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-	"log"
-	"os"
 )
 
 func main() {
