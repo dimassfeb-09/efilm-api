@@ -14,6 +14,7 @@ type Env struct {
 }
 
 func getEnv() *Env {
+
 	return &Env{
 		DBHost:    os.Getenv("DB_HOST"),
 		DBName:    os.Getenv("DB_NAME"),

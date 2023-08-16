@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -24,7 +23,7 @@ func GenerateTokenJWT(ID int, username string, role string) (string, error) {
 		"iss":      "eFilm APIs",
 		"iat":      time.Now().Unix(),
 		"nbf":      time.Now().Unix(),
-		"exp":      time.Now().Add(time.Hour * 1).Unix(),
+		"exp":      time.Now().Add(time.Hour * 365).Unix(),
 		"role":     role,
 		"username": username,
 	})
@@ -55,20 +54,18 @@ func ValidateTokenJWT(jwtToken string) (bool, error) {
 	})
 
 	if err != nil {
-		return false, errors.New("error parsing token")
+		return false, err
 	}
 
 	// Check if the token is valid
 	if token.Valid {
 		// Access the claims
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			username := claims["username"].(string)
-			role := claims["role"].(string)
-			expiration := time.Unix(int64(claims["exp"].(float64)), 0)
-
-			fmt.Printf("Username: %s\n", username)
-			fmt.Printf("Role: %s\n", role)
-			fmt.Printf("Expiration: %s\n", expiration)
+			expiration := int64(claims["exp"].(float64)) // expired token
+			currentDateTime := time.Now().Unix()
+			if currentDateTime > expiration {
+				return false, errors.New("token is expired")
+			}
 		}
 		return true, nil
 	} else {
