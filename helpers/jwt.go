@@ -8,15 +8,9 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/joho/godotenv"
 )
 
 func GenerateTokenJWT(ID int, username string, role string) (string, error) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Failed to load .env")
-	}
-
 	secretKeyJWTEnv := os.Getenv("SECRET_KEY_JWT")
 	if secretKeyJWTEnv == "" {
 		log.Fatal("SECRET_KEY_JWT not found")
@@ -44,11 +38,6 @@ func GenerateTokenJWT(ID int, username string, role string) (string, error) {
 }
 
 func ValidateTokenJWT(jwtToken string) (bool, error) {
-
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Failed to load .env")
-	}
 
 	secretKeyJWTEnv := os.Getenv("SECRET_KEY_JWT")
 	if secretKeyJWTEnv == "" {
