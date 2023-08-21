@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
 	"log"
 	"os"
 
@@ -13,6 +14,9 @@ func main() {
 	r := gin.Default()
 	r.HandleMethodNotAllowed = true
 	gin.SetMode(gin.ReleaseMode)
+	r.Use(app.AllowCORS)
+
+	godotenv.Load()
 
 	db := app.DBConnection()
 	defer db.Close()
