@@ -1,11 +1,13 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 
+	"github.com/joho/godotenv"
+
 	"github.com/dimassfeb-09/efilm-api.git/app"
+	"github.com/dimassfeb-09/efilm-api.git/middlewares"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
@@ -14,7 +16,7 @@ func main() {
 	r := gin.Default()
 	r.HandleMethodNotAllowed = true
 	gin.SetMode(gin.ReleaseMode)
-	r.Use(app.AllowCORS)
+	r.Use(middlewares.AllowCORS)
 
 	godotenv.Load()
 

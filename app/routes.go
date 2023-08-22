@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/dimassfeb-09/efilm-api.git/controller"
+	"github.com/dimassfeb-09/efilm-api.git/middlewares"
 	"github.com/dimassfeb-09/efilm-api.git/repository"
 	"github.com/dimassfeb-09/efilm-api.git/services"
 	"github.com/gin-gonic/gin"
@@ -24,7 +25,7 @@ func InitialozedRoute(r *gin.Engine, db *sql.DB) *gin.Engine {
 	actorService := services.NewActorService(db, actorRepository)
 	actorController := controller.NewActorControllerImpl(actorService)
 
-	api.Use(MiddlewareToken)
+	api.Use(middlewares.MiddlewareToken)
 
 	api.POST("/actors", actorController.Save)
 	api.GET("/actors", actorController.FindAll)
