@@ -15,6 +15,7 @@ type MovieRepository interface {
 	FindByID(ctx context.Context, db *sql.DB, ID int) (*domain.Movie, error)
 	FindByTitle(ctx context.Context, db *sql.DB, name string) (*domain.Movie, error)
 	FindAll(ctx context.Context, db *sql.DB) ([]*domain.Movie, error)
+	FindAllMoviesByGenreID(ctx context.Context, db *sql.DB, genreID int) ([]*domain.Movie, error)
 }
 
 type MovieRepositoryImpl struct {
@@ -94,6 +95,45 @@ func (a *MovieRepositoryImpl) FindAll(ctx context.Context, db *sql.DB) ([]*domai
 	for rows.Next() {
 		var movie domain.Movie
 		rows.Scan(&movie.ID, &movie.Title, &movie.ReleaseDate, &movie.Duration, &movie.Plot, &movie.PosterUrl, &movie.TrailerUrl, &movie.Language, &movie.CreatedAt, &movie.UpdatedAt)
+		movies = append(movies, &movie)
+	}
+
+	return movies, nil
+}
+
+func (a *MovieRepositoryImpl) FindAllMoviesByGenreID(ctx context.Context, db *sql.DB, genreID int) ([]*domain.Movie, error) {
+	query := `
+		SELECT movies.id as movie_id,
+		       movies.title as title,
+		       movies.release_date as release_date,
+		       movies.duration as duration,
+		       movies.plot as plot,
+		       movies.poster_url as poster_url,
+		       movies.trailer_url as trailer_url,
+		       movies.language as language,
+		       movies.created_at as created_at,
+		       movies.updated_at as updated_at,
+		       movie_genres.genre_id as genre_id
+		FROM movies 
+		    JOIN movie_genres ON movies.id = movie_genres.movie_id 
+		    JOIN genres ON movie_genres.genre_id = genres.id 
+		WHERE genres.id = $1
+		`
+	rows, err := db.Query(query, genreID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("failed get data from database")
+		}
+		return nil, err
+	}
+
+	var movies []*domain.Movie
+	for rows.Next() {
+		var movie domain.Movie
+		err := rows.Scan(&movie.ID, &movie.Title, &movie.ReleaseDate, &movie.Duration, &movie.Plot, &movie.PosterUrl, &movie.TrailerUrl, &movie.Language, &movie.CreatedAt, &movie.UpdatedAt, &genreID)
+		if err != nil {
+			return nil, err
+		}
 		movies = append(movies, &movie)
 	}
 

@@ -55,17 +55,6 @@ func InitialozedRoute(r *gin.Engine, db *sql.DB) *gin.Engine {
 	api.PUT("/nationals/:id", nationalController.Update)
 	api.DELETE("/nationals/:id", nationalController.Delete)
 
-	genreRepository := repository.NewGenreRepository()
-	genreService := services.NewGenreService(db, genreRepository)
-	genreController := controller.NewGenreControllerImpl(genreService)
-
-	api.POST("/genres", genreController.Save)
-	api.GET("/genres", genreController.FindAll)
-	api.GET("/genres/search", genreController.FindBySearch)
-	api.GET("/genres/:id", genreController.FindByID)
-	api.PUT("/genres/:id", genreController.Update)
-	api.DELETE("/genres/:id", genreController.Delete)
-
 	movieRepository := repository.NewMovieRepository()
 	movieService := services.NewMovieService(db, movieRepository)
 	movieController := controller.NewMovieControllerImpl(movieService)
@@ -76,6 +65,18 @@ func InitialozedRoute(r *gin.Engine, db *sql.DB) *gin.Engine {
 	api.GET("/movies/:movie_id", movieController.FindByID)
 	api.PUT("/movies/:movie_id", movieController.Update)
 	api.DELETE("/movies/:movie_id", movieController.Delete)
+
+	genreRepository := repository.NewGenreRepository()
+	genreService := services.NewGenreService(db, genreRepository, movieService)
+	genreController := controller.NewGenreControllerImpl(genreService)
+
+	api.POST("/genres", genreController.Save)
+	api.GET("/genres", genreController.FindAll)
+	api.GET("/genres/search", genreController.FindBySearch)
+	api.GET("/genres/:id", genreController.FindByID)
+	api.GET("/genres/:id/movies", genreController.FindAllMoviesByID)
+	api.PUT("/genres/:id", genreController.Update)
+	api.DELETE("/genres/:id", genreController.Delete)
 
 	movieActorsRepository := repository.NewMovieActorRepository()
 	movieActorsService := services.NewMovieActorService(db, movieActorsRepository)

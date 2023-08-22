@@ -15,6 +15,11 @@ type MovieModelResponse struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+type MoviesGenreResponse struct {
+	GenreID int                   `json:"genre_id"`
+	Movies  []*MovieModelResponse `json:"movies"`
+}
+
 type Movie struct {
 	MovieID     int       `json:"movie_id"`
 	Title       string    `json:"title"`

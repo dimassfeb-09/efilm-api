@@ -11,12 +11,12 @@ import (
 )
 
 type MovieController interface {
-	Save(gc *gin.Context)
-	Update(ctx *gin.Context)
-	Delete(ctx *gin.Context)
-	FindByID(ctx *gin.Context)
-	FindBySearch(ctx *gin.Context)
-	FindAll(ctx *gin.Context)
+	Save(c *gin.Context)
+	Update(c *gin.Context)
+	Delete(c *gin.Context)
+	FindByID(c *gin.Context)
+	FindBySearch(c *gin.Context)
+	FindAll(c *gin.Context)
 }
 
 type MovieControllerImpl struct {
@@ -27,11 +27,11 @@ func NewMovieControllerImpl(movieService services.MovieService) MovieController 
 	return &MovieControllerImpl{MovieService: movieService}
 }
 
-func (c *MovieControllerImpl) Save(gc *gin.Context) {
+func (controller *MovieControllerImpl) Save(c *gin.Context) {
 	var r web.MovieModelRequest
-	err := gc.ShouldBind(&r)
+	err := c.ShouldBind(&r)
 	if err != nil {
-		gc.JSON(http.StatusBadRequest, web.ResponseError{
+		c.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
 			Message: err.Error(),
@@ -39,9 +39,9 @@ func (c *MovieControllerImpl) Save(gc *gin.Context) {
 		return
 	}
 
-	err = c.MovieService.Save(context.Background(), &r)
+	err = controller.MovieService.Save(context.Background(), &r)
 	if err != nil {
-		gc.JSON(http.StatusBadRequest, web.ResponseError{
+		c.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
 			Message: err.Error(),
@@ -49,7 +49,7 @@ func (c *MovieControllerImpl) Save(gc *gin.Context) {
 		return
 	}
 
-	gc.JSON(http.StatusOK, web.ResponseSuccess{
+	c.JSON(http.StatusOK, web.ResponseSuccess{
 		Code:    http.StatusOK,
 		Status:  "Ok",
 		Message: "Successfully created movies",
@@ -57,10 +57,10 @@ func (c *MovieControllerImpl) Save(gc *gin.Context) {
 	return
 }
 
-func (c *MovieControllerImpl) Update(gc *gin.Context) {
-	ID, err := strconv.Atoi(gc.Param("movie_id"))
+func (controller *MovieControllerImpl) Update(c *gin.Context) {
+	ID, err := strconv.Atoi(c.Param("movie_id"))
 	if err != nil {
-		gc.JSON(http.StatusBadRequest, web.ResponseError{
+		c.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
 			Message: "Invalid format ID",
@@ -69,9 +69,9 @@ func (c *MovieControllerImpl) Update(gc *gin.Context) {
 	}
 
 	var r web.MovieModelRequest
-	err = gc.ShouldBind(&r)
+	err = c.ShouldBind(&r)
 	if err != nil {
-		gc.JSON(http.StatusBadRequest, web.ResponseError{
+		c.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
 			Message: err.Error(),
@@ -80,9 +80,9 @@ func (c *MovieControllerImpl) Update(gc *gin.Context) {
 	}
 
 	r.ID = ID
-	err = c.MovieService.Update(gc.Request.Context(), &r)
+	err = controller.MovieService.Update(c.Request.Context(), &r)
 	if err != nil {
-		gc.JSON(http.StatusBadRequest, web.ResponseError{
+		c.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
 			Message: err.Error(),
@@ -90,7 +90,7 @@ func (c *MovieControllerImpl) Update(gc *gin.Context) {
 		return
 	}
 
-	gc.JSON(http.StatusOK, web.ResponseSuccess{
+	c.JSON(http.StatusOK, web.ResponseSuccess{
 		Code:    http.StatusOK,
 		Status:  "Ok",
 		Message: fmt.Sprintf("Success update movies with ID %d", ID),
@@ -98,10 +98,10 @@ func (c *MovieControllerImpl) Update(gc *gin.Context) {
 	return
 }
 
-func (c *MovieControllerImpl) Delete(gc *gin.Context) {
-	ID, err := strconv.Atoi(gc.Param("movie_id"))
+func (controller *MovieControllerImpl) Delete(c *gin.Context) {
+	ID, err := strconv.Atoi(c.Param("movie_id"))
 	if err != nil {
-		gc.JSON(http.StatusBadRequest, web.ResponseError{
+		c.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
 			Message: "Invalid format ID",
@@ -109,9 +109,9 @@ func (c *MovieControllerImpl) Delete(gc *gin.Context) {
 		return
 	}
 
-	err = c.MovieService.Delete(gc.Request.Context(), ID)
+	err = controller.MovieService.Delete(c.Request.Context(), ID)
 	if err != nil {
-		gc.JSON(http.StatusBadRequest, web.ResponseError{
+		c.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
 			Message: err.Error(),
@@ -119,7 +119,7 @@ func (c *MovieControllerImpl) Delete(gc *gin.Context) {
 		return
 	}
 
-	gc.JSON(http.StatusOK, web.ResponseSuccess{
+	c.JSON(http.StatusOK, web.ResponseSuccess{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: fmt.Sprintf("Success delete data with ID %d", ID),
@@ -127,11 +127,11 @@ func (c *MovieControllerImpl) Delete(gc *gin.Context) {
 	return
 }
 
-func (c *MovieControllerImpl) FindByID(gc *gin.Context) {
+func (controller *MovieControllerImpl) FindByID(c *gin.Context) {
 
-	id, err := strconv.Atoi(gc.Param("movie_id"))
+	id, err := strconv.Atoi(c.Param("movie_id"))
 	if err != nil {
-		gc.JSON(http.StatusBadRequest, web.ResponseError{
+		c.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
 			Message: "Invalid format ID",
@@ -139,9 +139,9 @@ func (c *MovieControllerImpl) FindByID(gc *gin.Context) {
 		return
 	}
 
-	result, err := c.MovieService.FindByID(gc.Request.Context(), id)
+	result, err := controller.MovieService.FindByID(c.Request.Context(), id)
 	if err != nil {
-		gc.JSON(http.StatusOK, web.ResponseError{
+		c.JSON(http.StatusOK, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
 			Message: err.Error(),
@@ -156,18 +156,18 @@ func (c *MovieControllerImpl) FindByID(gc *gin.Context) {
 		Data:    result,
 	}
 
-	gc.JSON(http.StatusOK, webResponse)
+	c.JSON(http.StatusOK, webResponse)
 	return
 }
 
-func (c *MovieControllerImpl) FindBySearch(gc *gin.Context) {
-	title := gc.Query("title")
+func (controller *MovieControllerImpl) FindBySearch(c *gin.Context) {
+	title := c.Query("title")
 	var movies []*web.MovieModelResponse
 
 	if title != "" {
-		result, err := c.MovieService.FindByTitle(gc.Request.Context(), title)
+		result, err := controller.MovieService.FindByTitle(c.Request.Context(), title)
 		if err != nil {
-			gc.JSON(http.StatusOK, web.ResponseError{
+			c.JSON(http.StatusOK, web.ResponseError{
 				Code:    http.StatusBadRequest,
 				Status:  "Status Bad Request",
 				Message: err.Error(),
@@ -184,16 +184,16 @@ func (c *MovieControllerImpl) FindBySearch(gc *gin.Context) {
 		Data:    movies,
 	}
 
-	gc.JSON(http.StatusOK, webResponse)
+	c.JSON(http.StatusOK, webResponse)
 	return
 }
 
-func (c *MovieControllerImpl) FindAll(gc *gin.Context) {
+func (controller *MovieControllerImpl) FindAll(c *gin.Context) {
 
 	var responses []*web.MovieModelResponse
-	results, err := c.MovieService.FindAll(gc.Request.Context())
+	results, err := controller.MovieService.FindAll(c.Request.Context())
 	if err != nil {
-		gc.JSON(http.StatusBadRequest, web.ResponseError{
+		c.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
 			Status:  "Status Bad Request",
 			Message: "Failed get all data movies",
@@ -216,7 +216,7 @@ func (c *MovieControllerImpl) FindAll(gc *gin.Context) {
 		responses = append(responses, &response)
 	}
 
-	gc.JSON(http.StatusOK, web.ResponseGetSuccess{
+	c.JSON(http.StatusOK, web.ResponseGetSuccess{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data",

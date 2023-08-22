@@ -18,6 +18,7 @@ type MovieService interface {
 	FindByID(ctx context.Context, ID int) (*web.MovieModelResponse, error)
 	FindByTitle(ctx context.Context, name string) (*web.MovieModelResponse, error)
 	FindAll(ctx context.Context) ([]*web.MovieModelResponse, error)
+	FindAllMoviesByGenreID(ctx context.Context, genreID int) ([]*web.MovieModelResponse, error)
 }
 
 type MovieServiceImpl struct {
@@ -54,8 +55,6 @@ func (a *MovieServiceImpl) Save(ctx context.Context, r *web.MovieModelRequest) e
 		TrailerUrl:  r.TrailerUrl,
 		Language:    r.Language,
 	})
-
-	return nil
 }
 
 func (a *MovieServiceImpl) Update(ctx context.Context, r *web.MovieModelRequest) error {
@@ -169,6 +168,32 @@ func (a *MovieServiceImpl) FindAll(ctx context.Context) ([]*web.MovieModelRespon
 			UpdatedAt:   result.UpdatedAt,
 		}
 
+		responses = append(responses, &response)
+	}
+
+	return responses, nil
+}
+
+func (a *MovieServiceImpl) FindAllMoviesByGenreID(ctx context.Context, genreID int) ([]*web.MovieModelResponse, error) {
+	results, err := a.MovieRepository.FindAllMoviesByGenreID(ctx, a.DB, genreID)
+	if err != nil {
+		return nil, err
+	}
+
+	var responses []*web.MovieModelResponse
+	for _, result := range results {
+		response := web.MovieModelResponse{
+			ID:          result.ID,
+			Title:       result.Title,
+			ReleaseDate: result.ReleaseDate,
+			Duration:    result.Duration,
+			Plot:        result.Plot,
+			PosterUrl:   result.PosterUrl,
+			TrailerUrl:  result.TrailerUrl,
+			Language:    result.Language,
+			CreatedAt:   result.CreatedAt,
+			UpdatedAt:   result.UpdatedAt,
+		}
 		responses = append(responses, &response)
 	}
 

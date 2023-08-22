@@ -84,6 +84,7 @@ func (repository *GenreRepositoryaImpl) FindByName(ctx context.Context, db *sql.
 	}
 	return &genre, nil
 }
+
 func (repository *GenreRepositoryaImpl) FindByID(ctx context.Context, db *sql.DB, ID int) (*domain.Genre, error) {
 	var genre domain.Genre
 	err := db.QueryRowContext(ctx, "SELECT * FROM genres WHERE id = $1", ID).Scan(&genre.ID, &genre.Name, &genre.CreatedAt, &genre.UpdatedAt)

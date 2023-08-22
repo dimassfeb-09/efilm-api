@@ -15,6 +15,7 @@ type GenreService interface {
 	Update(ctx context.Context, r *web.GenreModelRequest) error
 	Delete(ctx context.Context, ID int) error
 	FindAll(ctx context.Context) ([]*web.GenreModelResponse, error)
+	FindAllMoviesByID(ctx context.Context, ID int) (*web.MoviesGenreResponse, error)
 	FindByID(ctx context.Context, ID int) (*web.GenreModelResponse, error)
 	FindByName(ctx context.Context, name string) (*web.GenreModelResponse, error)
 }
@@ -22,60 +23,61 @@ type GenreService interface {
 type GenreServiceImpl struct {
 	DB              *sql.DB
 	GenreRepository repository.GenreRepository
+	MovieService    MovieService
 }
 
-func NewGenreService(DB *sql.DB, genreRepository repository.GenreRepository) GenreService {
-	return &GenreServiceImpl{DB: DB, GenreRepository: genreRepository}
+func NewGenreService(DB *sql.DB, genreRepository repository.GenreRepository, movieService MovieService) GenreService {
+	return &GenreServiceImpl{DB: DB, GenreRepository: genreRepository, MovieService: movieService}
 }
 
-func (a *GenreServiceImpl) Save(ctx context.Context, r *web.GenreModelRequest) error {
-	tx, err := a.DB.Begin()
+func (service *GenreServiceImpl) Save(ctx context.Context, r *web.GenreModelRequest) error {
+	tx, err := service.DB.Begin()
 	if err != nil {
 		return err
 	}
 	defer helpers.RollbackOrCommit(ctx, tx)
 
-	_, err = a.FindByName(ctx, r.Name)
+	_, err = service.FindByName(ctx, r.Name)
 	if err == nil {
 		return errors.New("genre name already exists")
 	}
 
-	return a.GenreRepository.Save(ctx, tx, &domain.Genre{
+	return service.GenreRepository.Save(ctx, tx, &domain.Genre{
 		Name: r.Name,
 	})
 }
 
-func (a *GenreServiceImpl) Update(ctx context.Context, r *web.GenreModelRequest) error {
-	tx, err := a.DB.Begin()
+func (service *GenreServiceImpl) Update(ctx context.Context, r *web.GenreModelRequest) error {
+	tx, err := service.DB.Begin()
 	if err != nil {
 		return err
 	}
 	defer helpers.RollbackOrCommit(ctx, tx)
 
-	_, err = a.FindByID(ctx, r.ID)
+	_, err = service.FindByID(ctx, r.ID)
 	if err != nil {
 		return err
 	}
 
-	return a.GenreRepository.Update(ctx, tx, &domain.Genre{
+	return service.GenreRepository.Update(ctx, tx, &domain.Genre{
 		ID:   r.ID,
 		Name: r.Name,
 	})
 }
 
-func (a *GenreServiceImpl) Delete(ctx context.Context, ID int) error {
-	tx, err := a.DB.Begin()
+func (service *GenreServiceImpl) Delete(ctx context.Context, ID int) error {
+	tx, err := service.DB.Begin()
 	if err != nil {
 		return err
 	}
 	defer helpers.RollbackOrCommit(ctx, tx)
 
-	_, err = a.FindByID(ctx, ID)
+	_, err = service.FindByID(ctx, ID)
 	if err != nil {
 		return err
 	}
 
-	err = a.GenreRepository.Delete(ctx, tx, ID)
+	err = service.GenreRepository.Delete(ctx, tx, ID)
 	if err != nil {
 		return err
 	}
@@ -83,8 +85,8 @@ func (a *GenreServiceImpl) Delete(ctx context.Context, ID int) error {
 	return nil
 }
 
-func (a *GenreServiceImpl) FindByID(ctx context.Context, ID int) (*web.GenreModelResponse, error) {
-	result, err := a.GenreRepository.FindByID(ctx, a.DB, ID)
+func (service *GenreServiceImpl) FindByID(ctx context.Context, ID int) (*web.GenreModelResponse, error) {
+	result, err := service.GenreRepository.FindByID(ctx, service.DB, ID)
 	if err != nil {
 		return nil, err
 	}
@@ -97,9 +99,9 @@ func (a *GenreServiceImpl) FindByID(ctx context.Context, ID int) (*web.GenreMode
 	}, nil
 }
 
-func (a *GenreServiceImpl) FindByName(ctx context.Context, name string) (*web.GenreModelResponse, error) {
+func (service *GenreServiceImpl) FindByName(ctx context.Context, name string) (*web.GenreModelResponse, error) {
 
-	result, err := a.GenreRepository.FindByName(ctx, a.DB, name)
+	result, err := service.GenreRepository.FindByName(ctx, service.DB, name)
 	if err != nil {
 		return nil, err
 	}
@@ -112,8 +114,8 @@ func (a *GenreServiceImpl) FindByName(ctx context.Context, name string) (*web.Ge
 	}, nil
 }
 
-func (a *GenreServiceImpl) FindAll(ctx context.Context) ([]*web.GenreModelResponse, error) {
-	results, err := a.GenreRepository.FindAll(ctx, a.DB)
+func (service *GenreServiceImpl) FindAll(ctx context.Context) ([]*web.GenreModelResponse, error) {
+	results, err := service.GenreRepository.FindAll(ctx, service.DB)
 	if err != nil {
 		return nil, err
 	}
@@ -131,4 +133,35 @@ func (a *GenreServiceImpl) FindAll(ctx context.Context) ([]*web.GenreModelRespon
 	}
 
 	return responses, nil
+}
+
+func (service *GenreServiceImpl) FindAllMoviesByID(ctx context.Context, ID int) (*web.MoviesGenreResponse, error) {
+	_, err := service.GenreRepository.FindByID(ctx, service.DB, ID)
+	if err != nil {
+		return nil, err
+	}
+
+	results, err := service.MovieService.FindAllMoviesByGenreID(ctx, ID)
+	if err != nil {
+		return nil, err
+	}
+
+	var responses web.MoviesGenreResponse
+	for _, result := range results {
+		responses.Movies = append(responses.Movies, &web.MovieModelResponse{
+			ID:          result.ID,
+			Title:       result.Title,
+			ReleaseDate: result.ReleaseDate,
+			Duration:    result.Duration,
+			Plot:        result.Plot,
+			PosterUrl:   result.PosterUrl,
+			TrailerUrl:  result.TrailerUrl,
+			Language:    result.Language,
+			CreatedAt:   result.CreatedAt,
+			UpdatedAt:   result.UpdatedAt,
+		})
+	}
+	responses.GenreID = ID
+
+	return &responses, nil
 }
