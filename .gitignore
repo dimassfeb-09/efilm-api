@@ -1,5 +1,8 @@
 **/.env
 .env
+.env.development.local
+
+
 
 docker-compose.yml
 Dockerfile
