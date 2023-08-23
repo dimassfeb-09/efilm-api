@@ -39,7 +39,7 @@ func (controller *MovieControllerImpl) Save(c *gin.Context) {
 		return
 	}
 
-	err = controller.MovieService.Save(context.Background(), &r)
+	id, err := controller.MovieService.Save(context.Background(), &r)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, web.ResponseError{
 			Code:    http.StatusBadRequest,
@@ -49,10 +49,15 @@ func (controller *MovieControllerImpl) Save(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, web.ResponseSuccess{
+	c.JSON(http.StatusOK, web.ResponseGetSuccess{
 		Code:    http.StatusOK,
 		Status:  "Ok",
 		Message: "Successfully created movies",
+		Data: struct {
+			MovieID int `json:"movie_id"`
+		}{
+			MovieID: id,
+		},
 	})
 	return
 }

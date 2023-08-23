@@ -9,7 +9,7 @@ import (
 )
 
 type MovieRepository interface {
-	Save(ctx context.Context, tx *sql.Tx, movie *domain.Movie) error
+	Save(ctx context.Context, tx *sql.Tx, movie *domain.Movie) (movieID int, err error)
 	Update(ctx context.Context, tx *sql.Tx, movie *domain.Movie) error
 	Delete(ctx context.Context, tx *sql.Tx, ID int) error
 	FindByID(ctx context.Context, db *sql.DB, ID int) (*domain.Movie, error)
@@ -25,14 +25,15 @@ func NewMovieRepository() MovieRepository {
 	return &MovieRepositoryImpl{}
 }
 
-func (a *MovieRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, movie *domain.Movie) error {
-	query := "INSERT INTO movies (title, release_date, duration, plot, poster_url, trailer_url, language) VALUES ($1, $2, $3, $4, $5, $6, $7)"
-	_, err := tx.ExecContext(ctx, query, movie.Title, movie.ReleaseDate, movie.Duration, movie.Plot, movie.PosterUrl, movie.TrailerUrl, movie.Language)
+func (a *MovieRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, movie *domain.Movie) (int, error) {
+	var id int
+	query := "INSERT INTO movies (title, release_date, duration, plot, poster_url, trailer_url, language) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
+	err := tx.QueryRowContext(ctx, query, movie.Title, movie.ReleaseDate, movie.Duration, movie.Plot, movie.PosterUrl, movie.TrailerUrl, movie.Language).Scan(&id)
 	if err != nil {
-		return errors.New("failed save data movie")
+		return 0, errors.New("failed save data movie")
 	}
 
-	return nil
+	return id, nil
 }
 
 func (a *MovieRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, movie *domain.Movie) error {
@@ -102,8 +103,7 @@ func (a *MovieRepositoryImpl) FindAll(ctx context.Context, db *sql.DB) ([]*domai
 }
 
 func (a *MovieRepositoryImpl) FindAllMoviesByGenreID(ctx context.Context, db *sql.DB, genreID int) ([]*domain.Movie, error) {
-	query := `
-		SELECT movies.id as movie_id,
+	query := `SELECT movies.id as movie_id,
 		       movies.title as title,
 		       movies.release_date as release_date,
 		       movies.duration as duration,

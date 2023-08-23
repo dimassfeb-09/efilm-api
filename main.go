@@ -18,7 +18,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r.Use(middlewares.AllowCORS)
 
-	godotenv.Load()
+	godotenv.Load(".env.development.local")
 
 	db := app.DBConnection()
 	defer db.Close()

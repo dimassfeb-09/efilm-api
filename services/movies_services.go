@@ -12,7 +12,7 @@ import (
 )
 
 type MovieService interface {
-	Save(ctx context.Context, r *web.MovieModelRequest) error
+	Save(ctx context.Context, r *web.MovieModelRequest) (moveiID int, err error)
 	Update(ctx context.Context, r *web.MovieModelRequest) error
 	Delete(ctx context.Context, ID int) error
 	FindByID(ctx context.Context, ID int) (*web.MovieModelResponse, error)
@@ -30,21 +30,21 @@ func NewMovieService(DB *sql.DB, movieRepository repository.MovieRepository) Mov
 	return &MovieServiceImpl{DB: DB, MovieRepository: movieRepository}
 }
 
-func (a *MovieServiceImpl) Save(ctx context.Context, r *web.MovieModelRequest) error {
+func (a *MovieServiceImpl) Save(ctx context.Context, r *web.MovieModelRequest) (int, error) {
 	tx, err := a.DB.Begin()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer helpers.RollbackOrCommit(ctx, tx)
 
 	_, err = a.FindByTitle(ctx, r.Title)
 	if err == nil {
-		return errors.New("movie title already exists")
+		return 0, errors.New("movie title already exists")
 	}
 
 	releaseDate, err := time.Parse(time.DateOnly, r.ReleaseDate)
 	if err != nil {
-		return errors.New("incorrect date format yyyy-dd-mm")
+		return 0, errors.New("incorrect date format yyyy-dd-mm")
 	}
 	return a.MovieRepository.Save(ctx, tx, &domain.Movie{
 		Title:       r.Title,
