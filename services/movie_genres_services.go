@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/dimassfeb-09/efilm-api.git/entity/web"
 	"github.com/dimassfeb-09/efilm-api.git/helpers"
 	"github.com/dimassfeb-09/efilm-api.git/repository"
@@ -31,9 +32,12 @@ func (service *MovieGenreServiceImpl) Save(ctx context.Context, r *web.MovieGenr
 	}
 	defer helpers.RollbackOrCommit(ctx, tx)
 
-	err = service.MovieGenreRepository.Save(ctx, tx, r.MovieID, r.GenreID)
-	if err != nil {
-		return err
+	for _, genreID := range r.GenreIDS {
+		fmt.Println(r.MovieID)
+		err := service.MovieGenreRepository.Save(ctx, tx, r.MovieID, genreID)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -74,10 +78,9 @@ func (service *MovieGenreServiceImpl) FindByID(ctx context.Context, movieID int)
 		},
 	}
 
-	for _, genre := range result.Genres {
+	for _, genreID := range result.GenreIDS {
 		movieGenre.Genres = append(movieGenre.Genres, web.Genre{
-			GenreID: genre.ID,
-			Name:    genre.Name,
+			GenreID: genreID,
 		})
 	}
 

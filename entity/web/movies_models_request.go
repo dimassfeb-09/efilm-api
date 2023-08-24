@@ -11,6 +11,7 @@ type MovieModelRequest struct {
 	PosterUrl   string    `json:"poster_url"`
 	TrailerUrl  string    `json:"trailer_url"`
 	Language    string    `json:"language"`
+	GenreIDS    []int     `json:"genre_ids"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }

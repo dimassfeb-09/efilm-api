@@ -215,6 +215,7 @@ func (controller *MovieControllerImpl) FindAll(c *gin.Context) {
 			PosterUrl:   result.PosterUrl,
 			TrailerUrl:  result.TrailerUrl,
 			Language:    result.Language,
+			GenreIDS:    result.GenreIDS,
 			CreatedAt:   result.CreatedAt,
 			UpdatedAt:   result.UpdatedAt,
 		}

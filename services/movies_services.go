@@ -22,22 +22,23 @@ type MovieService interface {
 }
 
 type MovieServiceImpl struct {
-	DB              *sql.DB
-	MovieRepository repository.MovieRepository
+	DB                   *sql.DB
+	MovieRepository      repository.MovieRepository
+	movieGenreRepository repository.MovieGenreRepository
 }
 
 func NewMovieService(DB *sql.DB, movieRepository repository.MovieRepository) MovieService {
-	return &MovieServiceImpl{DB: DB, MovieRepository: movieRepository}
+	return &MovieServiceImpl{DB: DB, MovieRepository: movieRepository, movieGenreRepository: repository.NewMovieGenreRepository()}
 }
 
-func (a *MovieServiceImpl) Save(ctx context.Context, r *web.MovieModelRequest) (int, error) {
-	tx, err := a.DB.Begin()
+func (service *MovieServiceImpl) Save(ctx context.Context, r *web.MovieModelRequest) (int, error) {
+	tx, err := service.DB.Begin()
 	if err != nil {
 		return 0, err
 	}
 	defer helpers.RollbackOrCommit(ctx, tx)
 
-	_, err = a.FindByTitle(ctx, r.Title)
+	_, err = service.FindByTitle(ctx, r.Title)
 	if err == nil {
 		return 0, errors.New("movie title already exists")
 	}
@@ -46,7 +47,8 @@ func (a *MovieServiceImpl) Save(ctx context.Context, r *web.MovieModelRequest) (
 	if err != nil {
 		return 0, errors.New("incorrect date format yyyy-dd-mm")
 	}
-	return a.MovieRepository.Save(ctx, tx, &domain.Movie{
+
+	movieID, err := service.MovieRepository.Save(ctx, tx, &domain.Movie{
 		Title:       r.Title,
 		ReleaseDate: releaseDate,
 		Duration:    r.Duration,
@@ -55,16 +57,29 @@ func (a *MovieServiceImpl) Save(ctx context.Context, r *web.MovieModelRequest) (
 		TrailerUrl:  r.TrailerUrl,
 		Language:    r.Language,
 	})
+	if err != nil {
+		return 0, err
+	}
+
+	// Adding data genre_ids after added new movie
+	for _, genreID := range r.GenreIDS {
+		err := service.movieGenreRepository.Save(ctx, tx, movieID, genreID)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	return movieID, err
 }
 
-func (a *MovieServiceImpl) Update(ctx context.Context, r *web.MovieModelRequest) error {
-	tx, err := a.DB.Begin()
+func (service *MovieServiceImpl) Update(ctx context.Context, r *web.MovieModelRequest) error {
+	tx, err := service.DB.Begin()
 	if err != nil {
 		return err
 	}
 	defer helpers.RollbackOrCommit(ctx, tx)
 
-	_, err = a.FindByID(ctx, r.ID)
+	_, err = service.FindByID(ctx, r.ID)
 	if err != nil {
 		return err
 	}
@@ -74,7 +89,7 @@ func (a *MovieServiceImpl) Update(ctx context.Context, r *web.MovieModelRequest)
 		return errors.New("incorrect date format yyyy-dd-mm")
 	}
 
-	return a.MovieRepository.Update(ctx, tx, &domain.Movie{
+	return service.MovieRepository.Update(ctx, tx, &domain.Movie{
 		ID:          r.ID,
 		Title:       r.Title,
 		ReleaseDate: releaseDate,
@@ -86,19 +101,19 @@ func (a *MovieServiceImpl) Update(ctx context.Context, r *web.MovieModelRequest)
 	})
 }
 
-func (a *MovieServiceImpl) Delete(ctx context.Context, ID int) error {
-	tx, err := a.DB.Begin()
+func (service *MovieServiceImpl) Delete(ctx context.Context, ID int) error {
+	tx, err := service.DB.Begin()
 	if err != nil {
 		return err
 	}
 	defer helpers.RollbackOrCommit(ctx, tx)
 
-	_, err = a.FindByID(ctx, ID)
+	_, err = service.FindByID(ctx, ID)
 	if err != nil {
 		return err
 	}
 
-	err = a.MovieRepository.Delete(ctx, tx, ID)
+	err = service.MovieRepository.Delete(ctx, tx, ID)
 	if err != nil {
 		return err
 	}
@@ -106,66 +121,80 @@ func (a *MovieServiceImpl) Delete(ctx context.Context, ID int) error {
 	return nil
 }
 
-func (a *MovieServiceImpl) FindByID(ctx context.Context, ID int) (*web.MovieModelResponse, error) {
-	result, err := a.MovieRepository.FindByID(ctx, a.DB, ID)
+func (service *MovieServiceImpl) FindByID(ctx context.Context, ID int) (*web.MovieModelResponse, error) {
+	movieDetail, err := service.MovieRepository.FindByID(ctx, service.DB, ID)
 	if err != nil {
 		return nil, err
 	}
 
-	return &web.MovieModelResponse{
-		ID:          result.ID,
-		Title:       result.Title,
-		ReleaseDate: result.ReleaseDate,
-		Duration:    result.Duration,
-		Plot:        result.Plot,
-		PosterUrl:   result.PosterUrl,
-		TrailerUrl:  result.TrailerUrl,
-		Language:    result.Language,
-		CreatedAt:   result.CreatedAt,
-		UpdatedAt:   result.UpdatedAt,
-	}, nil
-}
-
-func (a *MovieServiceImpl) FindByTitle(ctx context.Context, name string) (*web.MovieModelResponse, error) {
-
-	result, err := a.MovieRepository.FindByTitle(ctx, a.DB, name)
+	movieGenre, err := service.movieGenreRepository.FindByID(ctx, service.DB, ID)
 	if err != nil {
 		return nil, err
 	}
 
+	releaseDateFormat := movieDetail.ReleaseDate.Format("2006-01-02")
+
 	return &web.MovieModelResponse{
-		ID:          result.ID,
-		Title:       result.Title,
-		ReleaseDate: result.ReleaseDate,
-		Duration:    result.Duration,
-		Plot:        result.Plot,
-		PosterUrl:   result.PosterUrl,
-		TrailerUrl:  result.TrailerUrl,
-		Language:    result.Language,
-		CreatedAt:   result.CreatedAt,
-		UpdatedAt:   result.UpdatedAt,
+		ID:          movieDetail.ID,
+		Title:       movieDetail.Title,
+		ReleaseDate: releaseDateFormat,
+		Duration:    movieDetail.Duration,
+		Plot:        movieDetail.Plot,
+		PosterUrl:   movieDetail.PosterUrl,
+		TrailerUrl:  movieDetail.TrailerUrl,
+		Language:    movieDetail.Language,
+		GenreIDS:    movieGenre.GenreIDS,
+		CreatedAt:   movieDetail.CreatedAt,
+		UpdatedAt:   movieDetail.UpdatedAt,
 	}, nil
 }
 
-func (a *MovieServiceImpl) FindAll(ctx context.Context) ([]*web.MovieModelResponse, error) {
-	results, err := a.MovieRepository.FindAll(ctx, a.DB)
+func (service *MovieServiceImpl) FindByTitle(ctx context.Context, name string) (*web.MovieModelResponse, error) {
+
+	movieDetail, err := service.MovieRepository.FindByTitle(ctx, service.DB, name)
+	if err != nil {
+		return nil, err
+	}
+
+	releaseDateFormat := movieDetail.ReleaseDate.Format("2006-01-02")
+
+	return &web.MovieModelResponse{
+		ID:          movieDetail.ID,
+		Title:       movieDetail.Title,
+		ReleaseDate: releaseDateFormat,
+		Duration:    movieDetail.Duration,
+		Plot:        movieDetail.Plot,
+		PosterUrl:   movieDetail.PosterUrl,
+		TrailerUrl:  movieDetail.TrailerUrl,
+		Language:    movieDetail.Language,
+		CreatedAt:   movieDetail.CreatedAt,
+		UpdatedAt:   movieDetail.UpdatedAt,
+	}, nil
+}
+
+func (service *MovieServiceImpl) FindAll(ctx context.Context) ([]*web.MovieModelResponse, error) {
+	moviesDetail, err := service.MovieRepository.FindAll(ctx, service.DB)
 	if err != nil {
 		return nil, err
 	}
 
 	var responses []*web.MovieModelResponse
-	for _, result := range results {
+	for _, movieDetail := range moviesDetail {
+		timeFormat := movieDetail.ReleaseDate.Format("2006-01-02")
+
+		genreDetail, _ := service.movieGenreRepository.FindByID(ctx, service.DB, movieDetail.ID)
 		response := web.MovieModelResponse{
-			ID:          result.ID,
-			Title:       result.Title,
-			ReleaseDate: result.ReleaseDate,
-			Duration:    result.Duration,
-			Plot:        result.Plot,
-			PosterUrl:   result.PosterUrl,
-			TrailerUrl:  result.TrailerUrl,
-			Language:    result.Language,
-			CreatedAt:   result.CreatedAt,
-			UpdatedAt:   result.UpdatedAt,
+			ID:          movieDetail.ID,
+			Title:       movieDetail.Title,
+			ReleaseDate: timeFormat,
+			Duration:    movieDetail.Duration,
+			Plot:        movieDetail.Plot,
+			PosterUrl:   movieDetail.PosterUrl,
+			TrailerUrl:  movieDetail.TrailerUrl,
+			Language:    movieDetail.Language,
+			GenreIDS:    genreDetail.GenreIDS,
+			CreatedAt:   movieDetail.CreatedAt,
+			UpdatedAt:   movieDetail.UpdatedAt,
 		}
 
 		responses = append(responses, &response)
@@ -174,25 +203,28 @@ func (a *MovieServiceImpl) FindAll(ctx context.Context) ([]*web.MovieModelRespon
 	return responses, nil
 }
 
-func (a *MovieServiceImpl) FindAllMoviesByGenreID(ctx context.Context, genreID int) ([]*web.MovieModelResponse, error) {
-	results, err := a.MovieRepository.FindAllMoviesByGenreID(ctx, a.DB, genreID)
+func (service *MovieServiceImpl) FindAllMoviesByGenreID(ctx context.Context, genreID int) ([]*web.MovieModelResponse, error) {
+	moviesDetail, err := service.MovieRepository.FindAllMoviesByGenreID(ctx, service.DB, genreID)
 	if err != nil {
 		return nil, err
 	}
 
 	var responses []*web.MovieModelResponse
-	for _, result := range results {
+	for _, movieDetail := range moviesDetail {
+
+		releaseDateFormat := movieDetail.ReleaseDate.Format("2006-01-02")
+
 		response := web.MovieModelResponse{
-			ID:          result.ID,
-			Title:       result.Title,
-			ReleaseDate: result.ReleaseDate,
-			Duration:    result.Duration,
-			Plot:        result.Plot,
-			PosterUrl:   result.PosterUrl,
-			TrailerUrl:  result.TrailerUrl,
-			Language:    result.Language,
-			CreatedAt:   result.CreatedAt,
-			UpdatedAt:   result.UpdatedAt,
+			ID:          movieDetail.ID,
+			Title:       movieDetail.Title,
+			ReleaseDate: releaseDateFormat,
+			Duration:    movieDetail.Duration,
+			Plot:        movieDetail.Plot,
+			PosterUrl:   movieDetail.PosterUrl,
+			TrailerUrl:  movieDetail.TrailerUrl,
+			Language:    movieDetail.Language,
+			CreatedAt:   movieDetail.CreatedAt,
+			UpdatedAt:   movieDetail.UpdatedAt,
 		}
 		responses = append(responses, &response)
 	}
