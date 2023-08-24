@@ -1,6 +1,6 @@
 package domain
 
 type MovieGenre struct {
-	Movie  Movie   `json:"movie"`
-	Genres []Genre `json:"directors"`
+	Movie    Movie `json:"movie"`
+	GenreIDS []int `json:"genre_ids"`
 }

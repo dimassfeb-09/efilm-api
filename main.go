@@ -4,8 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
-
 	"github.com/dimassfeb-09/efilm-api.git/app"
 	"github.com/dimassfeb-09/efilm-api.git/middlewares"
 	"github.com/gin-gonic/gin"
@@ -17,8 +15,6 @@ func main() {
 	r.HandleMethodNotAllowed = true
 	gin.SetMode(gin.ReleaseMode)
 	r.Use(middlewares.AllowCORS)
-
-	godotenv.Load(".env.development.local")
 
 	db := app.DBConnection()
 	defer db.Close()

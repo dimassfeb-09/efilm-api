@@ -89,13 +89,9 @@ func (repository *MovieGenreRepositoryaImpl) FindByID(ctx context.Context, db *s
 		}
 
 		if genreID.Valid {
-			genre := domain.Genre{
-				ID:   int(genreID.Int64),
-				Name: genreName.String,
-			}
-			genreMovie.Genres = append(genreMovie.Genres, genre)
+			genreMovie.GenreIDS = append(genreMovie.GenreIDS, int(genreID.Int64))
 		} else {
-			genreMovie.Genres = nil
+			genreMovie.GenreIDS = nil
 		}
 
 	}
