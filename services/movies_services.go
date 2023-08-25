@@ -105,7 +105,7 @@ func (service *MovieServiceImpl) Update(ctx context.Context, r *web.MovieModelRe
 			}
 		}
 
-		// If the genre is not found, save it
+		// If the genre is not found, will save it
 		if !found {
 			err := service.movieGenreRepository.Save(ctx, tx, r.ID, genreID)
 			if err != nil {
