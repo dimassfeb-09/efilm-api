@@ -84,9 +84,53 @@ func (service *MovieServiceImpl) Update(ctx context.Context, r *web.MovieModelRe
 		return err
 	}
 
+	// Parsing format date yyyy-mm-dd
 	releaseDate, err := time.Parse(time.DateOnly, r.ReleaseDate)
 	if err != nil {
-		return errors.New("incorrect date format yyyy-dd-mm")
+		return errors.New("incorrect date format yyyy-mm-dd")
+	}
+
+	genresMovie, err := service.movieGenreRepository.FindByID(ctx, service.DB, r.ID)
+	if err != nil {
+		return err
+	}
+
+	for _, genreID := range r.GenreIDS {
+		// Check if the genreID exists in the movie's genres
+		found := false
+		for _, genreIDMovie := range genresMovie.GenreIDS {
+			if genreID == genreIDMovie {
+				found = true
+				break
+			}
+		}
+
+		// If the genre is not found, save it
+		if !found {
+			err := service.movieGenreRepository.Save(ctx, tx, r.ID, genreID)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	// Loop through the movie's genres and check if any need to be deleted
+	for _, genreIDMovie := range genresMovie.GenreIDS {
+		found := false
+		for _, genreID := range r.GenreIDS {
+			if genreID == genreIDMovie {
+				found = true
+				break
+			}
+		}
+
+		// If the genre is not found in the request, delete it
+		if !found {
+			err := service.movieGenreRepository.Delete(ctx, tx, r.ID, genreIDMovie)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return service.MovieRepository.Update(ctx, tx, &domain.Movie{
