@@ -98,8 +98,8 @@ func (service *MovieServiceImpl) Update(ctx context.Context, r *web.MovieModelRe
 	for _, genreID := range r.GenreIDS {
 		// Check if the genreID exists in the movie's genres
 		found := false
-		for _, genreIDMovie := range genresMovie.GenreIDS {
-			if genreID == genreIDMovie {
+		for _, genreMovie := range genresMovie.Genres {
+			if genreID == genreMovie.ID {
 				found = true
 				break
 			}
@@ -115,10 +115,10 @@ func (service *MovieServiceImpl) Update(ctx context.Context, r *web.MovieModelRe
 	}
 
 	// Loop through the movie's genres and check if any need to be deleted
-	for _, genreIDMovie := range genresMovie.GenreIDS {
+	for _, genreMovie := range genresMovie.Genres {
 		found := false
 		for _, genreID := range r.GenreIDS {
-			if genreID == genreIDMovie {
+			if genreID == genreMovie.ID {
 				found = true
 				break
 			}
@@ -126,7 +126,7 @@ func (service *MovieServiceImpl) Update(ctx context.Context, r *web.MovieModelRe
 
 		// If the genre is not found in the request, delete it
 		if !found {
-			err := service.movieGenreRepository.Delete(ctx, tx, r.ID, genreIDMovie)
+			err := service.movieGenreRepository.Delete(ctx, tx, r.ID, genreMovie.ID)
 			if err != nil {
 				return err
 			}
@@ -178,6 +178,11 @@ func (service *MovieServiceImpl) FindByID(ctx context.Context, ID int) (*web.Mov
 
 	releaseDateFormat := movieDetail.ReleaseDate.Format("2006-01-02")
 
+	var genreIDS []int
+	for _, genre := range movieGenre.Genres {
+		genreIDS = append(genreIDS, genre.ID)
+	}
+
 	return &web.MovieModelResponse{
 		ID:          movieDetail.ID,
 		Title:       movieDetail.Title,
@@ -187,7 +192,7 @@ func (service *MovieServiceImpl) FindByID(ctx context.Context, ID int) (*web.Mov
 		PosterUrl:   movieDetail.PosterUrl,
 		TrailerUrl:  movieDetail.TrailerUrl,
 		Language:    movieDetail.Language,
-		GenreIDS:    movieGenre.GenreIDS,
+		GenreIDS:    genreIDS,
 		CreatedAt:   movieDetail.CreatedAt,
 		UpdatedAt:   movieDetail.UpdatedAt,
 	}, nil
@@ -227,6 +232,12 @@ func (service *MovieServiceImpl) FindAll(ctx context.Context) ([]*web.MovieModel
 		timeFormat := movieDetail.ReleaseDate.Format("2006-01-02")
 
 		genreDetail, _ := service.movieGenreRepository.FindByID(ctx, service.DB, movieDetail.ID)
+
+		var genreIDS []int
+		for _, genre := range genreDetail.Genres {
+			genreIDS = append(genreIDS, genre.ID)
+		}
+
 		response := web.MovieModelResponse{
 			ID:          movieDetail.ID,
 			Title:       movieDetail.Title,
@@ -236,7 +247,7 @@ func (service *MovieServiceImpl) FindAll(ctx context.Context) ([]*web.MovieModel
 			PosterUrl:   movieDetail.PosterUrl,
 			TrailerUrl:  movieDetail.TrailerUrl,
 			Language:    movieDetail.Language,
-			GenreIDS:    genreDetail.GenreIDS,
+			GenreIDS:    genreIDS,
 			CreatedAt:   movieDetail.CreatedAt,
 			UpdatedAt:   movieDetail.UpdatedAt,
 		}

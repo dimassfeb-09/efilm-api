@@ -92,10 +92,8 @@ func (service *GenreServiceImpl) FindByID(ctx context.Context, ID int) (*web.Gen
 	}
 
 	return &web.GenreModelResponse{
-		ID:        result.ID,
-		Name:      result.Name,
-		CreatedAt: result.CreatedAt,
-		UpdatedAt: result.UpdatedAt,
+		ID:   result.ID,
+		Name: result.Name,
 	}, nil
 }
 
@@ -107,10 +105,8 @@ func (service *GenreServiceImpl) FindByName(ctx context.Context, name string) (*
 	}
 
 	return &web.GenreModelResponse{
-		ID:        result.ID,
-		Name:      result.Name,
-		CreatedAt: result.CreatedAt,
-		UpdatedAt: result.UpdatedAt,
+		ID:   result.ID,
+		Name: result.Name,
 	}, nil
 }
 
@@ -123,10 +119,8 @@ func (service *GenreServiceImpl) FindAll(ctx context.Context) ([]*web.GenreModel
 	var responses []*web.GenreModelResponse
 	for _, result := range results {
 		response := web.GenreModelResponse{
-			ID:        result.ID,
-			Name:      result.Name,
-			CreatedAt: result.CreatedAt,
-			UpdatedAt: result.UpdatedAt,
+			ID:   result.ID,
+			Name: result.Name,
 		}
 
 		responses = append(responses, &response)

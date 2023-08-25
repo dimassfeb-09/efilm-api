@@ -50,12 +50,11 @@ func (repository *GenreRepositoryaImpl) Delete(ctx context.Context, tx *sql.Tx, 
 		}
 		return err
 	}
-
 	return nil
 }
 
 func (repository *GenreRepositoryaImpl) FindAll(ctx context.Context, db *sql.DB) ([]*domain.Genre, error) {
-	rows, err := db.QueryContext(ctx, "SELECT * FROM genres")
+	rows, err := db.QueryContext(ctx, "SELECT id, name FROM genres")
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("failed get data from database")
@@ -66,8 +65,9 @@ func (repository *GenreRepositoryaImpl) FindAll(ctx context.Context, db *sql.DB)
 	var genres []*domain.Genre
 	for rows.Next() {
 		var genre domain.Genre
-		rows.Scan(&genre.ID, &genre.Name, &genre.CreatedAt, &genre.UpdatedAt)
+		rows.Scan(&genre.ID, &genre.Name)
 		genres = append(genres, &genre)
+		fmt.Println(genre)
 	}
 
 	return genres, nil
@@ -75,7 +75,9 @@ func (repository *GenreRepositoryaImpl) FindAll(ctx context.Context, db *sql.DB)
 
 func (repository *GenreRepositoryaImpl) FindByName(ctx context.Context, db *sql.DB, name string) (*domain.Genre, error) {
 	var genre domain.Genre
-	err := db.QueryRowContext(ctx, "SELECT * FROM genres WHERE name = $1", name).Scan(&genre.ID, &genre.Name, &genre.CreatedAt, &genre.UpdatedAt)
+	err := db.QueryRowContext(ctx, "SELECT id, name FROM genres WHERE name = $1", name).
+		Scan(&genre.ID, &genre.Name)
+
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("genre with name %s not found", name)
@@ -87,7 +89,8 @@ func (repository *GenreRepositoryaImpl) FindByName(ctx context.Context, db *sql.
 
 func (repository *GenreRepositoryaImpl) FindByID(ctx context.Context, db *sql.DB, ID int) (*domain.Genre, error) {
 	var genre domain.Genre
-	err := db.QueryRowContext(ctx, "SELECT * FROM genres WHERE id = $1", ID).Scan(&genre.ID, &genre.Name, &genre.CreatedAt, &genre.UpdatedAt)
+	err := db.QueryRowContext(ctx, "SELECT id, name FROM genres WHERE id = $1", ID).
+		Scan(&genre.ID, &genre.Name)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("genre with id %d not found", ID)

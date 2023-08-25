@@ -78,9 +78,10 @@ func (service *MovieGenreServiceImpl) FindByID(ctx context.Context, movieID int)
 		},
 	}
 
-	for _, genreID := range result.GenreIDS {
+	for _, genre := range result.Genres {
 		movieGenre.Genres = append(movieGenre.Genres, web.Genre{
-			GenreID: genreID,
+			GenreID: genre.ID,
+			Name:    genre.Name,
 		})
 	}
 

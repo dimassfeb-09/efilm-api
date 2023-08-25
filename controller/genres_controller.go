@@ -208,10 +208,8 @@ func (controller *GenreControllerImpl) FindAll(c *gin.Context) {
 	}
 	for _, result := range results {
 		response := web.GenreModelResponse{
-			ID:        result.ID,
-			Name:      result.Name,
-			CreatedAt: result.CreatedAt,
-			UpdatedAt: result.UpdatedAt,
+			ID:   result.ID,
+			Name: result.Name,
 		}
 		responses = append(responses, &response)
 	}

@@ -1,10 +1,6 @@
 package domain
 
-import "time"
-
 type Genre struct {
-	ID        int
-	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
