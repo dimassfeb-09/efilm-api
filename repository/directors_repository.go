@@ -58,7 +58,7 @@ func (a *DirectorRepositoryImpl) FindByID(ctx context.Context, db *sql.DB, ID in
 	err := db.QueryRow("SELECT * FROM directors WHERE id = $1", ID).Scan(&director.ID, &director.Name, &director.DateOfBirth, &director.NationalityID, &director.CreatedAt, &director.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("sorry, id not found")
+			return nil, errors.New("sorry, director id not found")
 		}
 		return nil, err
 	}

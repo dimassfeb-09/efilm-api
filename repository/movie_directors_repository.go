@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/dimassfeb-09/efilm-api.git/entity/domain"
 	"time"
 )
@@ -12,7 +13,7 @@ type MovieDirectorRepository interface {
 	Save(ctx context.Context, tx *sql.Tx, movieID, directorID int) error
 	Delete(ctx context.Context, tx *sql.Tx, movieID int, directorID int) error
 	FindByID(ctx context.Context, db *sql.DB, movieID int) (*domain.MovieDirector, error)
-	FindDirectorExists(ctx context.Context, db *sql.DB, directorID int) error
+	FindDirectorAtMovie(ctx context.Context, db *sql.DB, movieID, directorID int) (exists bool, err error)
 }
 
 type MovieDirectorRepositoryaImpl struct {
@@ -111,14 +112,15 @@ func (repository *MovieDirectorRepositoryaImpl) FindByID(ctx context.Context, db
 	return &directorMovie, nil
 }
 
-func (repository *MovieDirectorRepositoryaImpl) FindDirectorExists(ctx context.Context, db *sql.DB, directorID int) error {
-	query := "SELECT director_id FROM movie_directors WHERE director_id = $1"
-	err := db.QueryRowContext(ctx, query, directorID).Scan(&directorID)
+func (repository *MovieDirectorRepositoryaImpl) FindDirectorAtMovie(ctx context.Context, db *sql.DB, movieID, directorID int) (bool, error) {
+	query := "SELECT movie_id FROM movie_directors WHERE movie_id = $1 AND director_id = $2"
+	err := db.QueryRowContext(ctx, query, movieID, directorID).Scan(&movieID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return errors.New("directors ID at movie not found")
+			return false, errors.New("directors ID at movie not found")
 		}
-		return err
+		fmt.Print(err)
+		return false, err
 	}
-	return nil
+	return true, nil
 }

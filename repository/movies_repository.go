@@ -61,7 +61,7 @@ func (a *MovieRepositoryImpl) FindByID(ctx context.Context, db *sql.DB, ID int) 
 		Scan(&movie.ID, &movie.Title, &movie.ReleaseDate, &movie.Duration, &movie.Plot, &movie.PosterUrl, &movie.TrailerUrl, &movie.Language, &movie.CreatedAt, &movie.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("sorry, id not found")
+			return nil, errors.New("sorry, movie id not found")
 		}
 		return nil, err
 	}
