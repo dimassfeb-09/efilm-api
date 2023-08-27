@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/dimassfeb-09/efilm-api.git/entity/domain"
 	"time"
 )
@@ -119,7 +118,6 @@ func (repository *MovieDirectorRepositoryaImpl) FindDirectorAtMovie(ctx context.
 		if errors.Is(err, sql.ErrNoRows) {
 			return false, errors.New("directors ID at movie not found")
 		}
-		fmt.Print(err)
 		return false, err
 	}
 	return true, nil

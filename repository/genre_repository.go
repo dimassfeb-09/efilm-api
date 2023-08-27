@@ -67,7 +67,6 @@ func (repository *GenreRepositoryaImpl) FindAll(ctx context.Context, db *sql.DB)
 		var genre domain.Genre
 		rows.Scan(&genre.ID, &genre.Name)
 		genres = append(genres, &genre)
-		fmt.Println(genre)
 	}
 
 	return genres, nil

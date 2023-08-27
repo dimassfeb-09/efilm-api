@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/dimassfeb-09/efilm-api.git/entity/web"
 	"github.com/dimassfeb-09/efilm-api.git/helpers"
 	"github.com/dimassfeb-09/efilm-api.git/repository"
@@ -33,7 +32,6 @@ func (service *MovieGenreServiceImpl) Save(ctx context.Context, r *web.MovieGenr
 	defer helpers.RollbackOrCommit(ctx, tx)
 
 	for _, genreID := range r.GenreIDS {
-		fmt.Println(r.MovieID)
 		err := service.MovieGenreRepository.Save(ctx, tx, r.MovieID, genreID)
 		if err != nil {
 			return err

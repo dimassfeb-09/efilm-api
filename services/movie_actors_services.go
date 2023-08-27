@@ -98,6 +98,7 @@ func (service *MovieActorServiceImpl) FindByID(ctx context.Context, movieID int)
 			ActorID:     actor.ID,
 			Name:        actor.Name,
 			DateOfBirth: actor.DateOfBirth,
+			Role:        actor.Role,
 		})
 	}
 

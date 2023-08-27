@@ -7,6 +7,7 @@ import (
 type Actor struct {
 	ActorID     int       `json:"actor_id"`
 	Name        string    `json:"name"`
+	Role        string    `json:"role"`
 	DateOfBirth time.Time `json:"date_of_birth"`
 }
 

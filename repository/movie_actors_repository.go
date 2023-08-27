@@ -67,7 +67,8 @@ func (repository *MovieActorRepositoryaImpl) FindByID(ctx context.Context, db *s
 			m.release_date AS release_date,
 			a.id AS actor_id,
 			a.name AS actor_name,
-			a.date_of_birth AS actor_dob
+			a.date_of_birth AS actor_dob,
+			ma.role AS actor_role
 		FROM movies m
 		LEFT JOIN movie_actors ma ON m.id = ma.movie_id
 		LEFT JOIN actors a ON ma.actor_id = a.id
@@ -88,6 +89,7 @@ func (repository *MovieActorRepositoryaImpl) FindByID(ctx context.Context, db *s
 		var actorID sql.NullInt64
 		var actorName sql.NullString
 		var actorDOB sql.NullTime
+		var actorRole string
 
 		rows.Scan(
 			&movieID,
@@ -96,6 +98,7 @@ func (repository *MovieActorRepositoryaImpl) FindByID(ctx context.Context, db *s
 			&actorID,
 			&actorName,
 			&actorDOB,
+			&actorRole,
 		)
 
 		actorMovie.Movie = domain.Movie{
@@ -105,16 +108,16 @@ func (repository *MovieActorRepositoryaImpl) FindByID(ctx context.Context, db *s
 		}
 
 		if actorID.Valid {
-			actor := domain.Actor{
+			actor := domain.ActorMovie{
 				ID:          int(actorID.Int64),
 				Name:        actorName.String,
 				DateOfBirth: actorDOB.Time,
+				Role:        actorRole,
 			}
 			actorMovie.Actors = append(actorMovie.Actors, actor)
 		} else {
 			actorMovie.Actors = nil
 		}
-
 	}
 
 	if actorMovie.Movie.ID == 0 {
