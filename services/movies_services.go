@@ -10,7 +10,6 @@ import (
 	"github.com/dimassfeb-09/efilm-api.git/repository"
 	"io"
 	"mime/multipart"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -27,13 +26,19 @@ type MovieService interface {
 }
 
 type MovieServiceImpl struct {
-	DB                   *sql.DB
-	MovieRepository      repository.MovieRepository
-	movieGenreRepository repository.MovieGenreRepository
+	DB                      *sql.DB
+	MovieRepository         repository.MovieRepository
+	movieGenreRepository    repository.MovieGenreRepository
+	movieDirectorRepository repository.MovieDirectorRepository
 }
 
 func NewMovieService(DB *sql.DB, movieRepository repository.MovieRepository) MovieService {
-	return &MovieServiceImpl{DB: DB, MovieRepository: movieRepository, movieGenreRepository: repository.NewMovieGenreRepository()}
+	return &MovieServiceImpl{
+		DB:                      DB,
+		MovieRepository:         movieRepository,
+		movieGenreRepository:    repository.NewMovieGenreRepository(),
+		movieDirectorRepository: repository.NewMovieDirectorRepository(),
+	}
 }
 
 func (service *MovieServiceImpl) Save(ctx context.Context, r *web.MovieModelRequest) (int, error) {
@@ -171,7 +176,7 @@ func (service *MovieServiceImpl) UploadFile(ctx context.Context, movieID int, fi
 	// getting file extention
 	contentType := fileHeader.Header.Get("Content-Type")
 	ext := strings.Split(contentType, "/")[1]
-	movie.PosterUrl = movie.Title + "_" + strconv.Itoa(int(movie.CreatedAt.Unix())) + "." + ext
+	movie.PosterUrl = movie.Title + "." + ext
 
 	bucket := helpers.NewFirebaseStorageClient(ctx)
 	obj := bucket.Object("images/movies/" + movie.PosterUrl)
@@ -195,6 +200,22 @@ func (service *MovieServiceImpl) Delete(ctx context.Context, ID int) error {
 	_, err = service.FindByID(ctx, ID)
 	if err != nil {
 		return err
+	}
+
+	directors, _ := service.movieDirectorRepository.FindByID(ctx, service.DB, ID)
+	for _, director := range directors.Directors {
+		err := service.movieDirectorRepository.Delete(ctx, tx, ID, director.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	genres, _ := service.movieGenreRepository.FindByID(ctx, service.DB, ID)
+	for _, genre := range genres.Genres {
+		err := service.movieGenreRepository.Delete(ctx, tx, ID, genre.ID)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = service.MovieRepository.Delete(ctx, tx, ID)
