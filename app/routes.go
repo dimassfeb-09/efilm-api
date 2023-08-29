@@ -60,6 +60,7 @@ func InitialozedRoute(r *gin.Engine, db *sql.DB) *gin.Engine {
 	movieService := services.NewMovieService(db, movieRepository)
 	movieController := controller.NewMovieControllerImpl(movieService)
 
+	api.POST("/movies/:movie_id/upload_poster", movieController.UploadPoster)
 	api.POST("/movies", movieController.Save)
 	api.GET("/movies", movieController.FindAll)
 	api.GET("/movies/search", movieController.FindBySearch)

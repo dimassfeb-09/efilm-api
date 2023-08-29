@@ -8,12 +8,17 @@ import (
 	"github.com/dimassfeb-09/efilm-api.git/entity/web"
 	"github.com/dimassfeb-09/efilm-api.git/helpers"
 	"github.com/dimassfeb-09/efilm-api.git/repository"
+	"io"
+	"mime/multipart"
+	"strconv"
+	"strings"
 	"time"
 )
 
 type MovieService interface {
 	Save(ctx context.Context, r *web.MovieModelRequest) (moveiID int, err error)
 	Update(ctx context.Context, r *web.MovieModelRequest) error
+	UploadFile(ctx context.Context, movieID int, fileHeader *multipart.FileHeader) error
 	Delete(ctx context.Context, ID int) error
 	FindByID(ctx context.Context, ID int) (*web.MovieModelResponse, error)
 	FindByTitle(ctx context.Context, name string) (*web.MovieModelResponse, error)
@@ -143,6 +148,41 @@ func (service *MovieServiceImpl) Update(ctx context.Context, r *web.MovieModelRe
 		TrailerUrl:  r.TrailerUrl,
 		Language:    r.Language,
 	})
+}
+
+func (service *MovieServiceImpl) UploadFile(ctx context.Context, movieID int, fileHeader *multipart.FileHeader) error {
+	tx, err := service.DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer helpers.RollbackOrCommit(ctx, tx)
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	movie, err := service.MovieRepository.FindByID(ctx, service.DB, movieID)
+	if err != nil {
+		return err
+	}
+
+	// getting file extention
+	contentType := fileHeader.Header.Get("Content-Type")
+	ext := strings.Split(contentType, "/")[1]
+	movie.PosterUrl = movie.Title + "_" + strconv.Itoa(int(movie.CreatedAt.Unix())) + "." + ext
+
+	bucket := helpers.NewFirebaseStorageClient(ctx)
+	obj := bucket.Object("images/movies/" + movie.PosterUrl)
+	wc := obj.NewWriter(ctx)
+	defer wc.Close()
+
+	if _, err := io.Copy(wc, file); err != nil {
+		return errors.New("Failed upload file")
+	}
+
+	return service.MovieRepository.Update(ctx, tx, movie)
 }
 
 func (service *MovieServiceImpl) Delete(ctx context.Context, ID int) error {

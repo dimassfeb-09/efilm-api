@@ -125,7 +125,7 @@ func (controller *MovieGenreControllerImpl) FindByID(gc *gin.Context) {
 		return
 	}
 
-	webResponse := web.ResponseGetSuccess{
+	webResponse := web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data genres from movies",
