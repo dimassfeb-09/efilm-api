@@ -13,7 +13,7 @@ type Env struct {
 	DBSSLMode string
 }
 
-func getEnv() *Env {
+func GetEnv() *Env {
 
 	return &Env{
 		DBHost:    os.Getenv("DB_HOST"),

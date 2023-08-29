@@ -148,7 +148,7 @@ func (controller *GenreControllerImpl) FindByID(c *gin.Context) {
 		return
 	}
 
-	webResponse := web.ResponseGetSuccess{
+	webResponse := web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data genres by id",
@@ -183,7 +183,7 @@ func (controller *GenreControllerImpl) FindBySearch(c *gin.Context) {
 		return
 	}
 
-	webResponse := web.ResponseGetSuccess{
+	webResponse := web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data genres by parameter",
@@ -214,7 +214,7 @@ func (controller *GenreControllerImpl) FindAll(c *gin.Context) {
 		responses = append(responses, &response)
 	}
 
-	c.JSON(http.StatusOK, web.ResponseGetSuccess{
+	c.JSON(http.StatusOK, web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data",
@@ -243,7 +243,7 @@ func (controller *GenreControllerImpl) FindAllMoviesByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, web.ResponseGetSuccess{
+	c.JSON(http.StatusOK, web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data",

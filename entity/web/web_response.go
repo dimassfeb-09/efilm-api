@@ -12,7 +12,7 @@ type ResponseError struct {
 	Message string `json:"message"`
 }
 
-type ResponseGetSuccess struct {
+type ResponseSuccessWithData struct {
 	Code    int    `json:"code"`
 	Status  string `json:"status"`
 	Message string `json:"message"`

@@ -8,12 +8,16 @@ import (
 	"github.com/dimassfeb-09/efilm-api.git/entity/web"
 	"github.com/dimassfeb-09/efilm-api.git/helpers"
 	"github.com/dimassfeb-09/efilm-api.git/repository"
+	"io"
+	"mime/multipart"
+	"strings"
 	"time"
 )
 
 type MovieService interface {
 	Save(ctx context.Context, r *web.MovieModelRequest) (moveiID int, err error)
 	Update(ctx context.Context, r *web.MovieModelRequest) error
+	UploadFile(ctx context.Context, movieID int, fileHeader *multipart.FileHeader) error
 	Delete(ctx context.Context, ID int) error
 	FindByID(ctx context.Context, ID int) (*web.MovieModelResponse, error)
 	FindByTitle(ctx context.Context, name string) (*web.MovieModelResponse, error)
@@ -22,13 +26,19 @@ type MovieService interface {
 }
 
 type MovieServiceImpl struct {
-	DB                   *sql.DB
-	MovieRepository      repository.MovieRepository
-	movieGenreRepository repository.MovieGenreRepository
+	DB                      *sql.DB
+	MovieRepository         repository.MovieRepository
+	movieGenreRepository    repository.MovieGenreRepository
+	movieDirectorRepository repository.MovieDirectorRepository
 }
 
 func NewMovieService(DB *sql.DB, movieRepository repository.MovieRepository) MovieService {
-	return &MovieServiceImpl{DB: DB, MovieRepository: movieRepository, movieGenreRepository: repository.NewMovieGenreRepository()}
+	return &MovieServiceImpl{
+		DB:                      DB,
+		MovieRepository:         movieRepository,
+		movieGenreRepository:    repository.NewMovieGenreRepository(),
+		movieDirectorRepository: repository.NewMovieDirectorRepository(),
+	}
 }
 
 func (service *MovieServiceImpl) Save(ctx context.Context, r *web.MovieModelRequest) (int, error) {
@@ -145,6 +155,41 @@ func (service *MovieServiceImpl) Update(ctx context.Context, r *web.MovieModelRe
 	})
 }
 
+func (service *MovieServiceImpl) UploadFile(ctx context.Context, movieID int, fileHeader *multipart.FileHeader) error {
+	tx, err := service.DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer helpers.RollbackOrCommit(ctx, tx)
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	movie, err := service.MovieRepository.FindByID(ctx, service.DB, movieID)
+	if err != nil {
+		return err
+	}
+
+	// getting file extention
+	contentType := fileHeader.Header.Get("Content-Type")
+	ext := strings.Split(contentType, "/")[1]
+	movie.PosterUrl = movie.Title + "." + ext
+
+	bucket := helpers.NewFirebaseStorageClient(ctx)
+	obj := bucket.Object("images/movies/" + movie.PosterUrl)
+	wc := obj.NewWriter(ctx)
+	defer wc.Close()
+
+	if _, err := io.Copy(wc, file); err != nil {
+		return errors.New("Failed upload file")
+	}
+
+	return service.MovieRepository.Update(ctx, tx, movie)
+}
+
 func (service *MovieServiceImpl) Delete(ctx context.Context, ID int) error {
 	tx, err := service.DB.Begin()
 	if err != nil {
@@ -155,6 +200,22 @@ func (service *MovieServiceImpl) Delete(ctx context.Context, ID int) error {
 	_, err = service.FindByID(ctx, ID)
 	if err != nil {
 		return err
+	}
+
+	directors, _ := service.movieDirectorRepository.FindByID(ctx, service.DB, ID)
+	for _, director := range directors.Directors {
+		err := service.movieDirectorRepository.Delete(ctx, tx, ID, director.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	genres, _ := service.movieGenreRepository.FindByID(ctx, service.DB, ID)
+	for _, genre := range genres.Genres {
+		err := service.movieGenreRepository.Delete(ctx, tx, ID, genre.ID)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = service.MovieRepository.Delete(ctx, tx, ID)

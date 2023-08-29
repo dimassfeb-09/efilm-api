@@ -147,7 +147,7 @@ func (c *NationalControllerImpl) FindByID(gc *gin.Context) {
 		return
 	}
 
-	webResponse := web.ResponseGetSuccess{
+	webResponse := web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data nationals by id",
@@ -182,7 +182,7 @@ func (c *NationalControllerImpl) FindBySearch(gc *gin.Context) {
 		return
 	}
 
-	webResponse := web.ResponseGetSuccess{
+	webResponse := web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data nationals by parameter",
@@ -215,7 +215,7 @@ func (c *NationalControllerImpl) FindAll(gc *gin.Context) {
 		responses = append(responses, &response)
 	}
 
-	gc.JSON(http.StatusOK, web.ResponseGetSuccess{
+	gc.JSON(http.StatusOK, web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data",

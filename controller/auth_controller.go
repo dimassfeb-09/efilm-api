@@ -75,7 +75,7 @@ func (c *AuthControllerImpl) Login(gc *gin.Context) {
 		return
 	}
 
-	gc.JSON(http.StatusOK, web.ResponseGetSuccess{
+	gc.JSON(http.StatusOK, web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: fmt.Sprintf("Success login with username %v", r.Username),

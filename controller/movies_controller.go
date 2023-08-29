@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/dimassfeb-09/efilm-api.git/entity/web"
+	"github.com/dimassfeb-09/efilm-api.git/helpers"
 	"github.com/dimassfeb-09/efilm-api.git/services"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 type MovieController interface {
 	Save(c *gin.Context)
 	Update(c *gin.Context)
+	UploadPoster(c *gin.Context)
 	Delete(c *gin.Context)
 	FindByID(c *gin.Context)
 	FindBySearch(c *gin.Context)
@@ -49,7 +51,7 @@ func (controller *MovieControllerImpl) Save(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, web.ResponseGetSuccess{
+	c.JSON(http.StatusOK, web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "Ok",
 		Message: "Successfully created movies",
@@ -99,6 +101,57 @@ func (controller *MovieControllerImpl) Update(c *gin.Context) {
 		Code:    http.StatusOK,
 		Status:  "Ok",
 		Message: fmt.Sprintf("Success update movies with ID %d", ID),
+	})
+	return
+}
+
+func (controller *MovieControllerImpl) UploadPoster(c *gin.Context) {
+
+	ID, err := strconv.Atoi(c.Param("movie_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.ResponseError{
+			Code:    http.StatusBadRequest,
+			Status:  "Status Bad Request",
+			Message: "Invalid format movie ID",
+		})
+		return
+	}
+
+	fileHeader, err := c.FormFile("poster_file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.ResponseError{
+			Code:    http.StatusBadRequest,
+			Status:  "Status Bad Request",
+			Message: "Cannot process file.",
+		})
+		return
+	}
+
+	contentType := fileHeader.Header.Get("Content-Type")
+	isValid := helpers.VerfiyFileType(contentType)
+	if isValid == false {
+		c.JSON(http.StatusBadRequest, web.ResponseError{
+			Code:    http.StatusBadRequest,
+			Status:  "Status Bad Request",
+			Message: fmt.Sprintf("File %s not accept, only image/png, image/jpg, image/jpeg", contentType),
+		})
+		return
+	}
+
+	err = controller.MovieService.UploadFile(c.Request.Context(), ID, fileHeader)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, web.ResponseError{
+			Code:    http.StatusBadRequest,
+			Status:  "Status Bad Request",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, web.ResponseSuccess{
+		Code:    http.StatusOK,
+		Status:  "Ok",
+		Message: "Success upload file.",
 	})
 	return
 }
@@ -154,7 +207,7 @@ func (controller *MovieControllerImpl) FindByID(c *gin.Context) {
 		return
 	}
 
-	webResponse := web.ResponseGetSuccess{
+	webResponse := web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data movies by id",
@@ -182,7 +235,7 @@ func (controller *MovieControllerImpl) FindBySearch(c *gin.Context) {
 		movies = append(movies, result)
 	}
 
-	webResponse := web.ResponseGetSuccess{
+	webResponse := web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data movies by search",
@@ -222,7 +275,7 @@ func (controller *MovieControllerImpl) FindAll(c *gin.Context) {
 		responses = append(responses, &response)
 	}
 
-	c.JSON(http.StatusOK, web.ResponseGetSuccess{
+	c.JSON(http.StatusOK, web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data",

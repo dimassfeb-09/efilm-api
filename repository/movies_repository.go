@@ -49,7 +49,7 @@ func (a *MovieRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, movie *dom
 func (a *MovieRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, ID int) error {
 	_, err := tx.Exec("DELETE FROM movies WHERE id = $1", ID)
 	if err != nil {
-		return errors.New("failed delete data from movies")
+		return err
 	}
 
 	return nil

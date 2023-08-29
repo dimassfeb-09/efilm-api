@@ -148,7 +148,7 @@ func (c *ActorControllerImpl) FindByID(gc *gin.Context) {
 		return
 	}
 
-	webResponse := web.ResponseGetSuccess{
+	webResponse := web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data actors by id",
@@ -200,7 +200,7 @@ func (c *ActorControllerImpl) FindBySearch(gc *gin.Context) {
 		actors = append(actors, result)
 	}
 
-	webResponse := web.ResponseGetSuccess{
+	webResponse := web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data actors by search",
@@ -235,7 +235,7 @@ func (c *ActorControllerImpl) FindAll(gc *gin.Context) {
 		responses = append(responses, &response)
 	}
 
-	gc.JSON(http.StatusOK, web.ResponseGetSuccess{
+	gc.JSON(http.StatusOK, web.ResponseSuccessWithData{
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: "Success get data",

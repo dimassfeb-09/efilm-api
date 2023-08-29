@@ -4,6 +4,8 @@
 
 docker-compose.yml
 Dockerfile
+firebase-admin-sdk.json
 
+./firebase-admin-sdk.json
 ./docker-compose.yml
 ./Dockerfile
