@@ -30,7 +30,7 @@ func MiddlewareToken(c *gin.Context) {
 			return
 		} else {
 			token := strings.TrimSpace(bearers[1])
-			isValid, err := helpers.ValidateTokenJWT(token)
+			isValid, _, err := helpers.ValidateTokenJWT(token)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, web.ResponseError{
 					Code:    http.StatusUnauthorized,

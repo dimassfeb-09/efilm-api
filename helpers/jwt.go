@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"errors"
+	"github.com/dimassfeb-09/efilm-api.git/entity/web"
 	"log"
 	"os"
 	"time"
@@ -36,7 +37,7 @@ func GenerateTokenJWT(ID int, username string, role string) (string, error) {
 	return signedToken, nil
 }
 
-func ValidateTokenJWT(jwtToken string) (bool, error) {
+func ValidateTokenJWT(jwtToken string) (bool, *web.UserInfoResponse, error) {
 
 	secretKeyJWTEnv := os.Getenv("SECRET_KEY_JWT")
 	if secretKeyJWTEnv == "" {
@@ -54,21 +55,28 @@ func ValidateTokenJWT(jwtToken string) (bool, error) {
 	})
 
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
 
 	// Check if the token is valid
 	if token.Valid {
+
+		var userInfo web.UserInfoResponse
+
 		// Access the claims
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			expiration := int64(claims["exp"].(float64)) // expired token
 			currentDateTime := time.Now().Unix()
 			if currentDateTime > expiration {
-				return false, errors.New("token is expired")
+				return false, nil, errors.New("token is expired")
 			}
+
+			userInfo.UserID = int(claims["id"].(float64))
+			userInfo.Username = claims["username"].(string)
+
 		}
-		return true, nil
+		return true, &userInfo, nil
 	} else {
-		return false, errors.New("token is invalid")
+		return false, nil, errors.New("token is invalid")
 	}
 }

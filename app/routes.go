@@ -25,6 +25,9 @@ func InitialozedRoute(r *gin.Engine, db *sql.DB) *gin.Engine {
 	actorService := services.NewActorService(db, actorRepository)
 	actorController := controller.NewActorControllerImpl(actorService)
 
+	userController := controller.NewUserController()
+	api.POST("/users/info", userController.GetUserInfo)
+
 	api.Use(middlewares.MiddlewareToken)
 
 	api.POST("/actors", actorController.Save)
