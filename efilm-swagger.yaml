@@ -1,8 +1,9 @@
 openapi: 3.0.3
-
 info:
   title: Open Service eFilm API
-  description: The Open Service Broker API defines an HTTP(S) interface between Platforms and Service Brokers.
+  description: >-
+    The Open Service Broker API defines an HTTP(S) interface between Platforms
+    and Service Brokers.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -11,14 +12,53 @@ info:
     url: https://dimassfeb.my.id
     email: dimassfeb@gmail.com
   version: master - might contain changes that are not yet released
-
 servers:
   - url: http://localhost:8080
     description: eFilm API Endpoint
-
 paths:
-
-  # NATIONAL
+  /api/users/info:
+    post:
+      summary: Validate token and getting user info
+      tags:
+        - Users
+      operationId: users.info.get
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          description: Getting from Auth Login
+          schema:
+            type: string
+            example: Bearer {{token}}
+      responses:
+        '200':
+          description: Response Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  status:
+                    type: string
+                    example: OK
+                  message:
+                    type: string
+                    example: Success getting info users
+                  data:
+                    type: object
+                    properties:
+                      user_id:
+                        type: integer
+                        example: 30
+                      username:
+                        type: string
+                        example: dimassfeb
+                      expired_date:
+                        type: string
+                        example: '2023-08-04T19:25:42.229484Z'
   /api/national:
     post:
       summary: add new national
@@ -61,7 +101,6 @@ paths:
             type: string
           required: true
           description: Name of the national to get
-
       responses:
         '200':
           description: national response
@@ -136,8 +175,6 @@ paths:
           $ref: '#/components/responses/400'
         '404':
           $ref: '#/components/responses/404'
-
-  # ACTORS
   /api/actors:
     post:
       summary: add new actors
@@ -186,7 +223,6 @@ paths:
             type: integer
           required: false
           description: Numeric ID of the national to get
-
       responses:
         '200':
           description: actors response
@@ -261,8 +297,6 @@ paths:
           $ref: '#/components/responses/400'
         '404':
           $ref: '#/components/responses/404'
-
-  # DIRECTORS
   /api/directors:
     post:
       summary: Add new data Directors
@@ -274,10 +308,10 @@ paths:
             schema:
               $ref: '#/components/schemas/DirectorsRequest'
       responses:
-        200:
-          $ref: "#/components/responses/201"
-        400:
-          $ref: "#/components/responses/400"
+        '200':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
     get:
       summary: Get all data Directors
       tags:
@@ -308,7 +342,6 @@ paths:
             type: integer
           required: false
           description: National ID of the directors to get
-
       responses:
         '200':
           description: directors response
@@ -350,10 +383,10 @@ paths:
             schema:
               $ref: '#/components/schemas/DirectorsRequest'
       responses:
-        200:
-          $ref: "#/components/responses/201"
-        400:
-          $ref: "#/components/responses/400"
+        '200':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
     delete:
       summary: Delete data Directors
       tags:
@@ -374,8 +407,6 @@ paths:
           $ref: '#/components/responses/400'
         '404':
           $ref: '#/components/responses/404'
-
-  # GENRES
   /api/genres:
     post:
       summary: Add new data Genres
@@ -387,10 +418,10 @@ paths:
             schema:
               $ref: '#/components/schemas/GenresRequest'
       responses:
-        200:
-          $ref: "#/components/responses/201"
-        400:
-          $ref: "#/components/responses/400"
+        '200':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
     get:
       summary: Get all data Genres
       tags:
@@ -415,7 +446,6 @@ paths:
             type: string
           required: true
           description: Name of the genres to get
-
       responses:
         '200':
           description: genres response
@@ -457,10 +487,10 @@ paths:
             schema:
               $ref: '#/components/schemas/GenresRequest'
       responses:
-        200:
-          $ref: "#/components/responses/201"
-        400:
-          $ref: "#/components/responses/400"
+        '200':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
     delete:
       summary: Delete data genres
       tags:
@@ -481,8 +511,6 @@ paths:
           $ref: '#/components/responses/400'
         '404':
           $ref: '#/components/responses/404'
-
-  # MOVIE
   /api/movie:
     post:
       summary: add new movie
@@ -525,7 +553,6 @@ paths:
             type: string
           required: true
           description: Name of the movie to get
-
       responses:
         '200':
           description: movie response
@@ -533,6 +560,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetAllResponseMovieSuccess'
+  /api/movie/{id}/upload_poster:
+    post:
+      summary: Upload Poster to Movie
+      tags:
+        - Movie
+      operationId: movie.upload.poster.post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                poster_file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Success get data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetResponseMovieSuccess'
+        '404':
+          $ref: '#/components/responses/404'
   /api/movie/{id}:
     get:
       summary: get the movie by id
@@ -598,8 +656,6 @@ paths:
           $ref: '#/components/responses/400'
         '404':
           $ref: '#/components/responses/404'
-
-  # MOVIE ACTORS
   /api/movies/{movie_id}/actors:
     post:
       summary: Add a new actor to a movie
@@ -628,8 +684,8 @@ paths:
                   type: string
                   example: Lead Actor
       responses:
-        "200":
-          $ref: "#/components/responses/200"
+        '200':
+          $ref: '#/components/responses/200'
     get:
       summary: Get a list of actors with a specific movie
       tags:
@@ -649,7 +705,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetResponseMovieActorSuccess'
-
   /movies/{movie_id}/actors/{actor_id}:
     put:
       summary: Update the role of an actors in a movie
@@ -698,14 +753,12 @@ paths:
         - name: actor_id
           in: path
           required: true
-          example:  1
+          example: 1
           schema:
             type: integer
       responses:
         '200':
           $ref: '#/components/responses/200'
-
-  # MOVIE DIRECTORS
   /api/movies/{movie_id}/directors:
     post:
       summary: Add a new director to a movie
@@ -730,8 +783,8 @@ paths:
                   type: integer
                   example: 1
       responses:
-        "200":
-          $ref: "#/components/responses/200"
+        '200':
+          $ref: '#/components/responses/200'
     get:
       summary: Get a list of directors with a specific movie
       tags:
@@ -772,8 +825,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/200'
-
-  # MOVIE GENRES
   /api/movies/{movie_id}/genres:
     post:
       summary: Add a new genre to a movie
@@ -798,8 +849,8 @@ paths:
                   type: integer
                   example: 1
       responses:
-        "200":
-          $ref: "#/components/responses/200"
+        '200':
+          $ref: '#/components/responses/200'
     get:
       summary: Get a list of genres with a specific movie
       tags:
@@ -840,12 +891,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/200'
-
-
 components:
   schemas:
-
-    # National Request Response
     NationalsRequest:
       type: object
       required:
@@ -865,11 +912,10 @@ components:
           example: Korea Selatan
         created_at:
           type: string
-          example: "2023-03-04T19:25:42.229484Z"
+          example: '2023-03-04T19:25:42.229484Z'
         updated_at:
           type: string
-          example: "2023-03-04T19:25:42.229484Z"
-
+          example: '2023-03-04T19:25:42.229484Z'
     GetResponseNationalSuccess:
       type: object
       properties:
@@ -881,7 +927,7 @@ components:
           example: OK
         message:
           type: string
-          example: "Successfully get genres"
+          example: Successfully get genres
         data:
           $ref: '#/components/schemas/NationalsResponse'
     GetAllResponseNationalSuccess:
@@ -895,13 +941,11 @@ components:
           example: OK
         message:
           type: string
-          example: "Successfully get all national"
+          example: Successfully get all national
         data:
           type: array
           items:
             $ref: '#/components/schemas/NationalsResponse'
-
-    # Actor Request Response
     ActorsRequest:
       type: object
       required:
@@ -914,7 +958,7 @@ components:
           example: Lee Ji Eun
         date_of_birth:
           type: string
-          example: "1992-10-19"
+          example: '1992-10-19'
         nationality_id:
           type: number
           example: 1
@@ -933,17 +977,16 @@ components:
           example: Lee Ji Eun
         date_of_birth:
           type: string
-          example: "1992-10-19T00:00:00Z"
+          example: '1992-10-19T00:00:00Z'
         nationality_id:
           type: number
           example: 1
         created_at:
           type: string
-          example: "2023-08-04T19:25:42.229484Z"
+          example: '2023-08-04T19:25:42.229484Z'
         update_at:
           type: string
-          example: "2023-08-04T19:25:42.229484Z"
-
+          example: '2023-08-04T19:25:42.229484Z'
     GetResponseActorSuccess:
       type: object
       properties:
@@ -955,7 +998,7 @@ components:
           example: OK
         message:
           type: string
-          example: "Successfully get actors"
+          example: Successfully get actors
         data:
           $ref: '#/components/schemas/ActorsResponse'
     GetAllResponseActorSuccess:
@@ -969,13 +1012,11 @@ components:
           example: OK
         message:
           type: string
-          example: "Successfully get all actors"
+          example: Successfully get all actors
         data:
           type: array
           items:
             $ref: '#/components/schemas/ActorsResponse'
-
-    # Director Request Response
     DirectorsRequest:
       type: object
       required:
@@ -988,7 +1029,7 @@ components:
           example: Lee Ji Eun
         date_of_birth:
           type: string
-          example: "1992-10-19"
+          example: '1992-10-19'
         nationality_id:
           type: number
           example: 1
@@ -1003,17 +1044,16 @@ components:
           example: Lee Ji Suk
         date_of_birth:
           type: string
-          example: "1992-05-19T00:00:00Z"
+          example: '1992-05-19T00:00:00Z'
         nationality_id:
           type: number
           example: 1
         created_at:
           type: string
-          example: "2023-03-04T19:25:42.229484Z"
+          example: '2023-03-04T19:25:42.229484Z'
         update_at:
           type: string
-          example: "2023-07-04T19:25:42.229484Z"
-
+          example: '2023-07-04T19:25:42.229484Z'
     GetResponseDirectorSuccess:
       type: object
       properties:
@@ -1025,7 +1065,7 @@ components:
           example: OK
         message:
           type: string
-          example: "Successfully get actors"
+          example: Successfully get actors
         data:
           $ref: '#/components/schemas/DirectorsResponse'
     GetAllResponseDirectorSuccess:
@@ -1039,13 +1079,11 @@ components:
           example: OK
         message:
           type: string
-          example: "Successfully get all directors"
+          example: Successfully get all directors
         data:
           type: array
           items:
             $ref: '#/components/schemas/DirectorsResponse'
-
-    # Genres Request Response
     GenresRequest:
       type: object
       required:
@@ -1063,7 +1101,6 @@ components:
         name:
           type: string
           example: Action
-
     GetResponseGenreSuccess:
       type: object
       properties:
@@ -1075,7 +1112,7 @@ components:
           example: OK
         message:
           type: string
-          example: "Successfully get genres"
+          example: Successfully get genres
         data:
           $ref: '#/components/schemas/GenresResponse'
     GetAllResponseGenreSuccess:
@@ -1089,13 +1126,11 @@ components:
           example: OK
         message:
           type: string
-          example: "Successfully get all genres"
+          example: Successfully get all genres
         data:
           type: array
           items:
             $ref: '#/components/schemas/GenresResponse'
-
-    # Movie Request Response
     MoviesRequest:
       type: object
       required:
@@ -1155,11 +1190,10 @@ components:
           example: Korean / Hangeul
         created_at:
           type: string
-          example: "2023-03-04T19:25:42.229484Z"
+          example: '2023-03-04T19:25:42.229484Z'
         updated_at:
           type: string
-          example: "2023-03-04T19:25:42.229484Z"
-
+          example: '2023-03-04T19:25:42.229484Z'
     GetResponseMovieSuccess:
       type: object
       properties:
@@ -1171,7 +1205,7 @@ components:
           example: OK
         message:
           type: string
-          example: "Successfully get genres"
+          example: Successfully get genres
         data:
           $ref: '#/components/schemas/MoviesResponse'
     GetAllResponseMovieSuccess:
@@ -1185,14 +1219,11 @@ components:
           example: OK
         message:
           type: string
-          example: "Successfully get all movies"
+          example: Successfully get all movies
         data:
           type: array
           items:
             $ref: '#/components/schemas/MoviesResponse'
-
-    # Movie Actor Request Response
-
     MovieActorsResponse:
       type: object
       properties:
@@ -1204,9 +1235,7 @@ components:
           example: Vagabond
         release_date:
           type: string
-          example: 1972-10-06T00:00:00Z
-
-
+          example: '1972-10-06T00:00:00.000Z'
     GetResponseMovieActorSuccess:
       type: object
       properties:
@@ -1218,7 +1247,7 @@ components:
           example: OK
         message:
           type: string
-          example: "Successfully get genres"
+          example: Successfully get genres
         data:
           properties:
             movie:
@@ -1227,11 +1256,6 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/ActorsResponse'
-
-
-
-    # Movie Director Request Response
-
     MovieDirectorsResponse:
       type: object
       properties:
@@ -1243,9 +1267,7 @@ components:
           example: Vagabond
         release_date:
           type: string
-          example: 1972-10-06T00:00:00Z
-
-
+          example: '1972-10-06T00:00:00.000Z'
     GetResponseMovieDirectorSuccess:
       type: object
       properties:
@@ -1257,7 +1279,7 @@ components:
           example: OK
         message:
           type: string
-          example: "Successfully get genres"
+          example: Successfully get genres
         data:
           properties:
             movie:
@@ -1266,11 +1288,6 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/DirectorsResponse'
-
-
-    # Movie Director Request Response
-
-
     MovieGenresResponse:
       type: object
       properties:
@@ -1282,8 +1299,7 @@ components:
           example: Vagabond
         release_date:
           type: string
-          example: "2023-03-04T19:25:42.229484Z"
-
+          example: '2023-03-04T19:25:42.229484Z'
     GetResponseMovieGenreSuccess:
       type: object
       properties:
@@ -1295,7 +1311,7 @@ components:
           example: OK
         message:
           type: string
-          example: "Successfully get genres"
+          example: Successfully get genres
         data:
           properties:
             movie:
@@ -1304,12 +1320,8 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/GenresResponse'
-
-
-
-
   responses:
-    200:
+    '200':
       description: Response if successful
       content:
         application/json:
@@ -1324,8 +1336,8 @@ components:
                 example: OK
               message:
                 type: string
-                example: "Successfully"
-    201:
+                example: Successfully
+    '201':
       description: Response if successful has created new data
       content:
         application/json:
@@ -1340,8 +1352,8 @@ components:
                 example: Status Created
               message:
                 type: string
-                example: "Successfully created data"
-    204:
+                example: Successfully created data
+    '204':
       description: Response if successful has deleted data
       content:
         application/json:
@@ -1356,8 +1368,8 @@ components:
                 example: Status No Content
               message:
                 type: string
-                example: "Successfully created data"
-    400:
+                example: Successfully created data
+    '400':
       description: Response if the request payload does not complete
       content:
         application/json:
@@ -1372,8 +1384,8 @@ components:
                 example: Status Bad Request
               message:
                 type: string
-                example: "Request playload is Required"
-    404:
+                example: Request playload is Required
+    '404':
       description: Response if the data is not found
       content:
         application/json:
@@ -1388,4 +1400,4 @@ components:
                 example: Status Not Found
               message:
                 type: string
-                example: "Data Not Found"
+                example: Data Not Found
