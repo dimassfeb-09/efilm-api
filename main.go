@@ -7,7 +7,6 @@ import (
 	"github.com/dimassfeb-09/efilm-api.git/app"
 	"github.com/dimassfeb-09/efilm-api.git/middlewares"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -17,18 +16,13 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r.Use(middlewares.AllowCORS)
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	db := app.DBConnection()
 	defer db.Close()
 
 	r = app.InitialozedRoute(r, db)
 
 	port := os.Getenv("APP_PORT")
-	err = r.Run(":" + port)
+	err := r.Run(":" + port)
 	if err != nil {
 		log.Fatalf("Cannot run at port 8080: %s", err.Error())
 	}
