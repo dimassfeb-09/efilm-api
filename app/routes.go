@@ -2,6 +2,7 @@ package app
 
 import (
 	"database/sql"
+	"net/http"
 
 	"github.com/dimassfeb-09/efilm-api.git/controller"
 	"github.com/dimassfeb-09/efilm-api.git/middlewares"
@@ -11,6 +12,12 @@ import (
 )
 
 func InitialozedRoute(r *gin.Engine, db *sql.DB) *gin.Engine {
+
+	// Index
+	r.GET("/", func(c *gin.Context) {
+		c.Writer.WriteHeader(http.StatusOK)
+		c.Writer.Write([]byte("Server ON!"))
+	})
 
 	api := r.Group("/api")
 
@@ -70,6 +77,14 @@ func InitialozedRoute(r *gin.Engine, db *sql.DB) *gin.Engine {
 	api.GET("/movies/:movie_id", movieController.FindByID)
 	api.PUT("/movies/:movie_id", movieController.Update)
 	api.DELETE("/movies/:movie_id", movieController.Delete)
+
+	recommendationMovieRepo := repository.NewRecommendationMovieRepositoryImpl()
+	recommendationMovieService := services.NewRecommendationMovieService(db, recommendationMovieRepo)
+	recommendationMovieController := controller.NewRecommendationMovieControllerImpl(recommendationMovieService)
+
+	api.GET("/movies/recommendation", recommendationMovieController.FindAll)
+	api.POST("/movies/recommendation", recommendationMovieController.Save)
+	api.DELETE("/movies/recommendation/:movie_id", recommendationMovieController.Delete)
 
 	genreRepository := repository.NewGenreRepository()
 	genreService := services.NewGenreService(db, genreRepository, movieService)
