@@ -1,12 +1,13 @@
 package helpers
 
 import (
-	"cloud.google.com/go/storage"
 	"context"
-	firebase "firebase.google.com/go/v4"
-	"google.golang.org/api/option"
 	"log"
 	"os"
+
+	"cloud.google.com/go/storage"
+	firebase "firebase.google.com/go/v4"
+	"google.golang.org/api/option"
 )
 
 func NewFirebaseStorageClient(ctx context.Context) *storage.BucketHandle {
