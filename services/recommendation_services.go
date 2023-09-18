@@ -67,6 +67,14 @@ func (a *RecommendationMovieServiceImpl) FindByID(ctx context.Context, MovieID i
 		ID:          result.ID,
 		Title:       result.Title,
 		ReleaseDate: result.ReleaseDate,
+		Duration:    result.Duration,
+		Plot:        result.Plot,
+		PosterUrl:   result.PosterUrl,
+		TrailerUrl:  result.TrailerUrl,
+		Language:    result.Language,
+		NationalID:  result.NationalID,
+		CreatedAt:   result.CreatedAt,
+		UpdatedAt:   result.UpdatedAt,
 	}, nil
 }
 
@@ -82,6 +90,14 @@ func (a *RecommendationMovieServiceImpl) FindAll(ctx context.Context) ([]*web.Re
 			ID:          result.ID,
 			Title:       result.Title,
 			ReleaseDate: result.ReleaseDate,
+			Duration:    result.Duration,
+			Plot:        result.Plot,
+			PosterUrl:   result.PosterUrl,
+			TrailerUrl:  result.TrailerUrl,
+			Language:    result.Language,
+			NationalID:  result.NationalID,
+			CreatedAt:   result.CreatedAt,
+			UpdatedAt:   result.UpdatedAt,
 		}
 
 		responses = append(responses, &response)

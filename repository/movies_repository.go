@@ -27,19 +27,25 @@ func NewMovieRepository() MovieRepository {
 
 func (a *MovieRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, movie *domain.Movie) (int, error) {
 	var id int
-	query := "INSERT INTO movies (title, release_date, duration, plot, poster_url, trailer_url, language) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
-	err := tx.QueryRowContext(ctx, query, movie.Title, movie.ReleaseDate, movie.Duration, movie.Plot, movie.PosterUrl, movie.TrailerUrl, movie.Language).Scan(&id)
+	query := `
+		INSERT INTO 
+		    movies (title, release_date, duration, plot, poster_url, trailer_url, language, nationality_id) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`
+
+	err := tx.QueryRowContext(ctx, query, movie.Title, movie.ReleaseDate, movie.Duration, movie.Plot, movie.PosterUrl, movie.TrailerUrl, movie.Language, movie.NationalID).
+		Scan(&id)
 	if err != nil {
-		return 0, errors.New("failed save data movie")
+		return 0, err
 	}
 
 	return id, nil
 }
 
 func (a *MovieRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, movie *domain.Movie) error {
-	query := "UPDATE movies SET id = $1, title = $2, release_date = $3, duration = $4, plot = $5, poster_url = $6, trailer_url = $7, language = $8, updated_at = CURRENT_TIMESTAMP WHERE id = $9"
-	_, err := tx.ExecContext(ctx, query, movie.ID, movie.Title, movie.ReleaseDate, movie.Duration, movie.Plot, movie.PosterUrl, movie.TrailerUrl, movie.Language, movie.ID)
+	query := "UPDATE movies SET id = $1, title = $2, release_date = $3, duration = $4, plot = $5, poster_url = $6, trailer_url = $7, language = $8, nationality_id = $9, updated_at = CURRENT_TIMESTAMP WHERE id = $10"
+	_, err := tx.ExecContext(ctx, query, movie.ID, movie.Title, movie.ReleaseDate, movie.Duration, movie.Plot, movie.PosterUrl, movie.TrailerUrl, movie.Language, movie.NationalID, movie.ID)
 	if err != nil {
+		fmt.Println(err)
 		return errors.New("failed update data movie")
 	}
 
@@ -56,9 +62,28 @@ func (a *MovieRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, ID int) er
 }
 
 func (a *MovieRepositoryImpl) FindByID(ctx context.Context, db *sql.DB, ID int) (*domain.Movie, error) {
+
+	query := `
+		SELECT 
+		    m.id as id, 
+		    title, 
+		    release_date, 
+		    duration, 
+		    plot, 
+		    poster_url, 
+		    trailer_url, 
+		    language, 
+		    n.id as national_id,
+		    m.created_at as created_at, 
+		    m.updated_at as updated_at 
+		FROM movies as m
+		JOIN national as n ON m.nationality_id = n.id
+		WHERE m.id = $1`
+
 	var movie domain.Movie
-	err := db.QueryRow("SELECT * FROM movies WHERE id = $1", ID).
-		Scan(&movie.ID, &movie.Title, &movie.ReleaseDate, &movie.Duration, &movie.Plot, &movie.PosterUrl, &movie.TrailerUrl, &movie.Language, &movie.CreatedAt, &movie.UpdatedAt)
+	row := db.QueryRowContext(ctx, query, ID)
+
+	err := row.Scan(&movie.ID, &movie.Title, &movie.ReleaseDate, &movie.Duration, &movie.Plot, &movie.PosterUrl, &movie.TrailerUrl, &movie.Language, &movie.NationalID, &movie.CreatedAt, &movie.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.New("sorry, movie id not found")
@@ -84,7 +109,23 @@ func (a *MovieRepositoryImpl) FindByTitle(ctx context.Context, db *sql.DB, title
 }
 
 func (a *MovieRepositoryImpl) FindAll(ctx context.Context, db *sql.DB) ([]*domain.Movie, error) {
-	rows, err := db.Query("SELECT * FROM movies")
+	query := `
+		SELECT 
+		    m.id as id, 
+		    title, 
+		    release_date, 
+		    duration, 
+		    plot, 
+		    poster_url, 
+		    trailer_url, 
+		    language, 
+		    n.id as national_id,
+		    m.created_at as created_at, 
+		    m.updated_at as updated_at 
+		FROM movies as m
+		JOIN national as n ON m.nationality_id = n.id`
+
+	rows, err := db.QueryContext(ctx, query)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("failed get data from database")
@@ -95,7 +136,18 @@ func (a *MovieRepositoryImpl) FindAll(ctx context.Context, db *sql.DB) ([]*domai
 	var movies []*domain.Movie
 	for rows.Next() {
 		var movie domain.Movie
-		rows.Scan(&movie.ID, &movie.Title, &movie.ReleaseDate, &movie.Duration, &movie.Plot, &movie.PosterUrl, &movie.TrailerUrl, &movie.Language, &movie.CreatedAt, &movie.UpdatedAt)
+		rows.Scan(
+			&movie.ID,
+			&movie.Title,
+			&movie.ReleaseDate,
+			&movie.Duration,
+			&movie.Plot,
+			&movie.PosterUrl,
+			&movie.TrailerUrl,
+			&movie.Language,
+			&movie.NationalID,
+			&movie.CreatedAt,
+			&movie.UpdatedAt)
 		movies = append(movies, &movie)
 	}
 

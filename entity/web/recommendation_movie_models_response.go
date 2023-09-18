@@ -1,7 +1,17 @@
 package web
 
+import "time"
+
 type RecommendationMovieModelResponse struct {
-	ID          int    `json:"movie_id"`
-	Title       string `json:"title"`
-	ReleaseDate string `json:"release_date"`
+	ID          int       `json:"movie_id"`
+	Title       string    `json:"title"`
+	ReleaseDate time.Time `json:"release_date"`
+	Duration    int       `json:"duration"`
+	Plot        string    `json:"plot"`
+	PosterUrl   string    `json:"poster_url"`
+	TrailerUrl  string    `json:"trailer_url"`
+	Language    string    `json:"language"`
+	NationalID  int       `json:"national_id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }

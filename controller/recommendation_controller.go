@@ -100,6 +100,14 @@ func (c *RecommendationMovieControllerImpl) FindAll(gc *gin.Context) {
 			ID:          result.ID,
 			Title:       result.Title,
 			ReleaseDate: result.ReleaseDate,
+			Duration:    result.Duration,
+			Plot:        result.Plot,
+			PosterUrl:   result.PosterUrl,
+			TrailerUrl:  result.TrailerUrl,
+			Language:    result.Language,
+			NationalID:  result.NationalID,
+			CreatedAt:   result.CreatedAt,
+			UpdatedAt:   result.UpdatedAt,
 		}
 		responses = append(responses, &response)
 	}

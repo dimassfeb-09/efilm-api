@@ -12,6 +12,7 @@ type MovieModelResponse struct {
 	TrailerUrl  string    `json:"trailer_url"`
 	Language    string    `json:"language"`
 	GenreIDS    []int     `json:"genre_ids"`
+	NationalID  int       `json:"national_id"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }

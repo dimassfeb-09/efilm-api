@@ -22,7 +22,21 @@ func NewRecommendationMovieRepositoryImpl() RecommendationMovieRepository {
 }
 
 func (repository *RecommendationRepositoryImpl) FindAll(ctx context.Context, tx *sql.DB) ([]*domain.RecommendationMovie, error) {
-	query := "SELECT movie_id AS id, title, release_date  FROM recommendation JOIN movies AS m on m.id = recommendation.movie_id"
+	query := `
+			SELECT movie_id AS id,
+				   title,
+				   release_date,
+				   duration,
+				   plot,
+				   poster_url,
+				   trailer_url,
+				   language,
+				   n.id as national_id,
+				   m.created_at as created_at,
+				   m.updated_at as updated_at
+			FROM recommendation
+					 JOIN movies AS m on m.id = recommendation.movie_id
+					 JOIN national AS n on n.id = m.nationality_id`
 	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -31,7 +45,18 @@ func (repository *RecommendationRepositoryImpl) FindAll(ctx context.Context, tx 
 	var recommendations []*domain.RecommendationMovie
 	for rows.Next() {
 		var recommendation domain.RecommendationMovie
-		err := rows.Scan(&recommendation.ID, &recommendation.Title, &recommendation.ReleaseDate)
+		err := rows.
+			Scan(&recommendation.ID,
+				&recommendation.Title,
+				&recommendation.ReleaseDate,
+				&recommendation.Duration,
+				&recommendation.Plot,
+				&recommendation.PosterUrl,
+				&recommendation.TrailerUrl,
+				&recommendation.Language,
+				&recommendation.NationalID,
+				&recommendation.CreatedAt,
+				&recommendation.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}

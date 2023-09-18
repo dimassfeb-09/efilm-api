@@ -66,6 +66,7 @@ func (service *MovieServiceImpl) Save(ctx context.Context, r *web.MovieModelRequ
 		PosterUrl:   r.PosterUrl,
 		TrailerUrl:  r.TrailerUrl,
 		Language:    r.Language,
+		NationalID:  r.NationalID,
 	})
 	if err != nil {
 		return 0, err
@@ -152,6 +153,7 @@ func (service *MovieServiceImpl) Update(ctx context.Context, r *web.MovieModelRe
 		PosterUrl:   r.PosterUrl,
 		TrailerUrl:  r.TrailerUrl,
 		Language:    r.Language,
+		NationalID:  r.NationalID,
 	})
 }
 
@@ -254,6 +256,7 @@ func (service *MovieServiceImpl) FindByID(ctx context.Context, ID int) (*web.Mov
 		TrailerUrl:  movieDetail.TrailerUrl,
 		Language:    movieDetail.Language,
 		GenreIDS:    genreIDS,
+		NationalID:  movieDetail.NationalID,
 		CreatedAt:   movieDetail.CreatedAt,
 		UpdatedAt:   movieDetail.UpdatedAt,
 	}, nil
@@ -309,6 +312,7 @@ func (service *MovieServiceImpl) FindAll(ctx context.Context) ([]*web.MovieModel
 			TrailerUrl:  movieDetail.TrailerUrl,
 			Language:    movieDetail.Language,
 			GenreIDS:    genreIDS,
+			NationalID:  movieDetail.NationalID,
 			CreatedAt:   movieDetail.CreatedAt,
 			UpdatedAt:   movieDetail.UpdatedAt,
 		}
