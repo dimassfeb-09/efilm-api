@@ -1,0 +1,27 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_PORT: "8080"
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      DB_SSL_MODE: ${DB_SSL_MODE:-disable}
+      SECRET_KEY_JWT: ${SECRET_KEY_JWT}
+      # BUCKET_NAME_FIREBASE: ${BUCKET_NAME_FIREBASE}
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+    # Uncomment and provide the file if you want poster upload to Firebase Storage:
+    # volumes:
+    #   - ./firebase-admin-sdk.json:/app/firebase-admin-sdk.json:ro

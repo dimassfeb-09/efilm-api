@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"log"
 	"os"
 
@@ -10,6 +11,9 @@ import (
 	_ "github.com/lib/pq"
 )
 
+//go:embed init.sql
+var schemaSQL string
+
 func main() {
 	r := gin.Default()
 	r.HandleMethodNotAllowed = true
@@ -18,6 +22,10 @@ func main() {
 
 	db := app.DBConnection()
 	defer db.Close()
+
+	if _, err := db.Exec(schemaSQL); err != nil {
+		log.Fatalf("Failed to initialize database schema: %s", err.Error())
+	}
 
 	r = app.InitialozedRoute(r, db)
 

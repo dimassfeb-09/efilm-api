@@ -54,8 +54,6 @@ func (a *DirectorServiceImpl) Save(ctx context.Context, r *web.DirectorModelRequ
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
 	})
-
-	return nil
 }
 
 func (a *DirectorServiceImpl) Update(ctx context.Context, r *web.DirectorModelRequest) error {

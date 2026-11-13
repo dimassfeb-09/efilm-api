@@ -97,7 +97,7 @@ func (a *MovieRepositoryImpl) FindByID(ctx context.Context, db *sql.DB, ID int) 
 func (a *MovieRepositoryImpl) FindByTitle(ctx context.Context, db *sql.DB, title string) (*domain.Movie, error) {
 	var movie domain.Movie
 	err := db.QueryRow("SELECT * FROM movies WHERE title = $1", title).
-		Scan(&movie.ID, &movie.Title, &movie.ReleaseDate, &movie.Duration, &movie.Plot, &movie.PosterUrl, &movie.TrailerUrl, &movie.Language, &movie.CreatedAt, &movie.UpdatedAt)
+		Scan(&movie.ID, &movie.Title, &movie.ReleaseDate, &movie.Duration, &movie.Plot, &movie.PosterUrl, &movie.TrailerUrl, &movie.Language, &movie.NationalID, &movie.CreatedAt, &movie.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("movie with name %s not found", title)

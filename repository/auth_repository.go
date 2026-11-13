@@ -67,7 +67,7 @@ func (a *AuthRepositoryImpl) FindByID(ctx context.Context, db *sql.DB, ID int) (
 	err := db.QueryRow("SELECT id FROM users WHERE id = $1", ID).Scan(&auth.ID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("auth with username %s not found", ID)
+			return nil, fmt.Errorf("auth with id %d not found", ID)
 		}
 		return nil, err
 	}
